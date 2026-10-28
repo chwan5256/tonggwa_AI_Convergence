@@ -303,15 +303,15 @@ function showCheck(x){
   var P=function(v){ return isNaN(v)?'—':(v*100).toFixed(1)+'%'; }, X=function(v){ return isNaN(v)?'—':v.toFixed(2)+'배'; };
   var M=function(m){ return '정확도 '+P(m.acc)+' · 비 맞힘 '+P(m.recall)+' · 놓침 '+m.fn.toLocaleString()+' · 헛경보 '+m.fp.toLocaleString(); };
   var rows=x.hyps.map(function(h){ return '<tr><td>'+esc(h.text)+'</td><td class="num">'+h.ct.nCond.toLocaleString()+'</td><td class="num">'+P(h.ct.pCond)+' / '+P(h.ct.pBase)+'</td><td class="num">'+(isNaN(h.ct.ratio)?'—':h.ct.ratio.toFixed(2))+'</td><td>'+esc(h.verdict)+'</td><td>'+(isNaN(h.pm.ratio)?'—':h.pm.ratio.toFixed(2))+' · '+esc(h.pmVerdict)+'</td></tr>'; }).join('');
-  var txt=['[수업 전 점검표] 기준: 앞으로 '+x.H+'시간 강수 0.1 mm 이상 · 학습 '+x.TR.join('–')+' / 시험 '+x.TE.join('–'),
-    '학습 행 '+x.rows+' (제외 '+x.dropped+') · 비 시간 비율 전체 '+P(x.rainAll)+' · 학습 '+P(x.rainTr)+' · 시험 '+P(x.rainTe)]
+  var txt=['[수업 전 점검표] 기준: 앞으로 '+x.H+'시간 강수 0.1 mm 이상 · 공부 기간 '+x.TR.join('–')+' / 대결 기간 '+x.TE.join('–'),
+    '분석 행 '+x.rows+' (제외 '+x.dropped+') · 비 시간 비율 전체 '+P(x.rainAll)+' · 공부 기간 '+P(x.rainTr)+' · 대결 기간 '+P(x.rainTe)]
     .concat(x.hyps.map(function(h){ return '가설 '+h.text+': 조건 '+h.ct.nCond+'시간, '+P(h.ct.pCond)+' vs 평소 '+P(h.ct.pBase)+' = '+X(h.ct.ratio)+' → '+h.verdict+' / 오후(13~17시)만 '+X(h.pm.ratio)+' → '+h.pmVerdict; }))
     .concat(['무조건 비 안 옴: '+M(x.dry),'규칙(3시간 동안 기압 1 hPa 이상 하강): '+M(x.rule),'AI(깊이 3): '+M(x.ai)+' · 첫 질문 “'+x.root+'”','AI(비 놓침 벌점 '+x.weight.toFixed(1)+'배): '+M(x.aiW),
       'AI 변수 중요도: '+x.importance.map(function(i){ return i.name+' '+(i.value*100).toFixed(0)+'%'; }).join(', ')])
     .concat(x.perYear.map(function(y){ return y.year+'년: 비 비율 '+P(y.rain)+', AI 비 맞힘 '+P(y.ai.recall); })).join('\n');
   $('chkOut').innerHTML='<p class="note">학생 화면과 같은 계산 함수로 구한 값입니다. 수업 전에 발문·활동지 예시와 맞는지 확인하세요.</p>'+
-    '<table><tr><th>가설(기본 기준값, 학습 기간)</th><th class="num">조건 시간</th><th class="num">조건일 때 / 평소</th><th class="num">배수</th><th>판정</th><th>오후(13~17시)만</th></tr>'+rows+'</table>'+
-    '<table><tr><th>시험 기간 '+x.TE.join('–')+'</th><th>결과</th></tr><tr><td>😴 무조건 비 안 옴</td><td>'+M(x.dry)+'</td></tr><tr><td>📏 규칙(3시간 동안 기압 1 hPa 이상 하강)</td><td>'+M(x.rule)+'</td></tr><tr><td>🤖 AI(깊이 3)</td><td>'+M(x.ai)+'</td></tr><tr><td>🤖 AI(비 놓침 벌점)</td><td>'+M(x.aiW)+'</td></tr></table>'+
+    '<table><tr><th>가설(기본 기준값, 공부 기간)</th><th class="num">조건 시간</th><th class="num">조건일 때 / 평소</th><th class="num">배수</th><th>판정</th><th>오후(13~17시)만</th></tr>'+rows+'</table>'+
+    '<table><tr><th>대결 기간 '+x.TE.join('–')+'</th><th>결과</th></tr><tr><td>😴 무조건 비 안 옴</td><td>'+M(x.dry)+'</td></tr><tr><td>📏 규칙(3시간 동안 기압 1 hPa 이상 하강)</td><td>'+M(x.rule)+'</td></tr><tr><td>🤖 AI(깊이 3)</td><td>'+M(x.ai)+'</td></tr><tr><td>🤖 AI(비 놓침 벌점)</td><td>'+M(x.aiW)+'</td></tr></table>'+
     '<p>점검표 전체(복사해 두기):</p><textarea readonly>'+esc(txt)+'</textarea>';
 }
 })();

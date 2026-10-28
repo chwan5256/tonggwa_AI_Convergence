@@ -4,7 +4,7 @@
    ========================================================================== */
 window.AIF_CONFIG = {
   /* Apps Script 웹 앱 주소(/exec). 넣어 두면 학생 링크에 ?gas= 를 붙이지 않아도 됩니다. */
-  GAS: '',
+  GAS: 'https://script.google.com/macros/s/AKfycbyCSWrLmybIicCOl63mqFPc-fR3yAMt3IggV9mixaGGFJ5WwNgsHhyTF1QuMtynLOiS/exec',
 
   /* 구글 로그인 클라이언트 ID — 통합과학2 수업 웹앱(tonggwa2)과 같은 값.
      같은 github.io 주소에서 열리므로 '승인된 자바스크립트 원본'을 따로 더할 필요가 없습니다. */

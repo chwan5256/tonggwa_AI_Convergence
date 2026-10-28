@@ -220,14 +220,14 @@ svg text{font-family:var(--sans)}
 
 <section class="step">
   <h2><span class="n">03</span>10년 빅데이터로 검증<span class="min">7분</span></h2>
-  <p>기상청 서울 관측소의 <b>매시간</b> 기록 중 <b>학습 기간(<span class="pTrain">—</span>)</b>을 씁니다(시험 기간은 04에서 대결용으로 아껴 둠). “조건이 맞았던 시간”만 골라 그중 몇 %가 실제로 <b>이후 <span class="hH">6</span>시간 안에 비</b>였는지 셉니다.</p>
+  <p>기상청 서울 관측소의 <b>매시간</b> 기록 중 <b>AI가 공부할 기간(<span class="pTrain">—</span>)</b>만 씁니다. “조건이 맞았던 시간”만 골라 그중 몇 %가 실제로 <b>이후 <span class="hH">6</span>시간 안에 비</b>였는지 셉니다.</p>
   <button class="btn" id="testBtn" type="button" disabled>검증하기</button>
   <div id="testOut"></div>
 </section>
 
 <section class="step">
   <h2><span class="n">04</span>규칙 예보관 vs AI 예보관<span class="min">8분</span></h2>
-  <p><span class="pTrain">학습 기간</span> 자료로 만들고(학습), <b>한 번도 보지 않은 <span class="pTest">시험 기간</span></b>으로 시험합니다. 03의 가설 검증도 학습 기간 자료만 쓰므로 규칙 예보관도 시험 기간을 미리 보지 않았습니다.</p>
+  <p>📘 <b>공부 기간</b>(<span class="pTrain">—</span>)의 기록으로 예보관을 만들고, 🎯 <b>대결 기간</b>(<span class="pTest">—</span>) — AI가 한 번도 보지 못한 최근 기록 — 으로 누가 더 잘 맞히는지 겨룹니다. 03에서 가설을 검증할 때도 공부 기간만 썼으니, 우리 규칙도 대결 기간을 미리 보지 않았습니다.</p>
   <div class="row"><b>📏 우리 규칙:</b> <span id="ruleText">—</span></div>
   <div class="row"><label>조건 하나 더(그리고) <select id="rule2"><option value="">없음</option></select></label>
     <span id="rule2th" class="hidden"><input type="range" id="th2"> <b id="th2Val" class="num"></b></span></div>
@@ -286,15 +286,16 @@ svg text{font-family:var(--sans)}
   <p class="note">하루 결과만으로 어느 예보관이 더 낫다고 말할 수 있을까? 몇 번을 채점해야 믿을 만할까?</p>
 </section>
 <section class="step">
-  <h2><span class="n">02</span>학습 기간과 시험 기간 나누기</h2>
+  <h2><span class="n">02</span>공부 기간과 대결 기간을 바꿔 보기</h2>
+  <p>📘 <b>공부 기간</b> = AI가 보고 배우는 기록, 🎯 <b>대결 기간</b> = AI가 처음 보는 기록(실력 확인용). 기간을 바꾸면 AI의 실력이 어떻게 달라질까요?</p>
   <div class="row">
-    <label>학습 <select id="tr0"></select>–<select id="tr1"></select></label>
-    <label>시험 <select id="te0"></select>–<select id="te1"></select></label>
-    <label>시험 계절 <select id="season"><option value="all">전체</option><option value="spring">봄</option><option value="summer">여름</option><option value="autumn">가을</option><option value="winter">겨울</option></select></label>
-    <button class="btn" id="splitBtn" type="button" disabled>다시 학습·시험</button>
+    <label>📘 공부 기간 <select id="tr0"></select>–<select id="tr1"></select></label>
+    <label>🎯 대결 기간 <select id="te0"></select>–<select id="te1"></select></label>
+    <label>대결 계절 <select id="season"><option value="all">전체</option><option value="spring">봄</option><option value="summer">여름</option><option value="autumn">가을</option><option value="winter">겨울</option></select></label>
+    <button class="btn" id="splitBtn" type="button" disabled>다시 공부시키고 대결</button>
   </div>
   <div id="splitOut"></div>
-  <p class="note">예측: 과거 자료로만 배운 AI는 학습 기간에 거의 없던 조건(기후 변화, 드문 극한 호우)에서 어떻게 될까? 위 결과가 그 예측을 지지하는지, 지지하지 않는다면 왜인지 써 보세요.</p>
+  <p class="note">예측: 과거 자료로만 배운 AI는 공부 기간에 거의 없던 조건(기후 변화, 드문 극한 호우)에서 어떻게 될까? 위 결과가 그 예측을 지지하는지, 지지하지 않는다면 왜인지 써 보세요.</p>
 </section>
 <section class="step">
   <h2><span class="n">03</span>실제 AI 기상예보 사례</h2>
@@ -418,7 +419,7 @@ function showTab(t){
   var T={l1:['1차시','우리 학교 기상관측소 세우기'],l2:['2차시','속담 vs 빅데이터 vs AI — 누가 비를 맞힐까?'],l3:['3차시','예보 채점과 AI의 한계'],l4:['4차시','날씨 예보를 AI에게 맡겨도 될까?']}[t];
   var DEK={l1:'우리 학교 곳곳에 무선센서를 두고 기상청 관측소 값과 비교해 관측의 대표성을 따져 본 뒤, 날씨 속담을 데이터로 확인할 수 있는 탐구 질문으로 바꿉니다.',
     l2:'과학 원리로 가설을 세우고, 기상청 10년 관측 빅데이터로 검증하고, AI 예보관을 학습시켜 사람이 만든 규칙과 겨룹니다. 마지막엔 우리 학교 무선 날씨센서의 오늘 값으로 오늘 저녁까지의 비를 예보합니다.',
-    l3:'어제 낸 예보를 실제 날씨로 채점하고, 학습 기간과 시험 기간을 나눠 과거 자료로 배운 AI의 한계를 확인합니다.',
+    l3:'어제 낸 예보를 실제 날씨로 채점하고, AI가 공부한 기간과 처음 보는 기간을 바꿔 가며 과거 자료로 배운 AI의 한계를 확인합니다.',
     l4:'1~3차시에 직접 얻은 근거로 이해관계자의 관점을 분석하고, 과학 윤리에 근거한 조건부 정책을 제안합니다.'};
   if (DEK[t]) $('dek').textContent=DEK[t];
   if (T){ $('title').textContent=T[1]; document.title=T[0]+' '+T[1]+' · 통합과학2 AI 융합수업'; }
@@ -607,7 +608,7 @@ $('trainBtn').onclick = function(){
     '<div class="grid2"><div><h3>🤖 AI 예보관이 만든 질문 나무</h3><div class="tree"><ul><li>'+treeHTML(MODEL.root)+'</li></ul></div></div>'+
     '<div><h3>AI가 중요하게 본 변수</h3>'+bars(MODEL.importance.map(function(x){ return {label:x.name, v:x.value*100, text:pct(x.value,0)}; }),100)+
     '<p class="note">AI가 <b>가장 먼저</b> 물어본 질문은 무엇인가요? 그 변수가 왜 비와 관련 있을지 <b>과학 원리</b>로 설명해 보세요.</p></div></div>'+
-    '<h3>시험 결과 ('+TEST[0]+'–'+TEST[1]+', '+s.te.length.toLocaleString()+'시간)</h3>'+
+    '<h3>🎯 대결 결과 — AI가 처음 보는 '+TEST[0]+'–'+TEST[1]+'년 기록 ('+s.te.length.toLocaleString()+'시간)</h3>'+
     scoreTable([{name:'📏 우리 규칙',m:mr},{name:'🤖 AI',m:ma}], false)+
     bars([{label:'📏 우리 규칙',v:mr.acc*100,text:pct(mr.acc),color:'var(--s2)'},{label:'🤖 AI',v:ma.acc*100,text:pct(ma.acc),color:'var(--s1)'}],100);
   $('trapOut').innerHTML='';
@@ -619,9 +620,9 @@ $('trapBtn').onclick = function(){
   var s=trainTest();
   var md=C.evaluate(s.te,function(){return 0;}), mr=C.evaluate(s.te,rulePredict()), ma=C.evaluate(s.te,C.predictTree(MODEL));
   var nRain=s.tr.filter(function(r){return r.rain;}).length, k=(s.tr.length-nRain)/nRain;
-  saveEv('trap','2차시 정확도의 함정', '시험 '+TEST[0]+'–'+TEST[1]+': 무조건 비 안 옴 정확도 '+pct(md.acc)+'(비 맞힘 '+pct(md.recall)+'), 우리 규칙 정확도 '+pct(mr.acc)+'·비 맞힘 '+pct(mr.recall)+', AI 정확도 '+pct(ma.acc)+'·비 맞힘 '+pct(ma.recall));
+  saveEv('trap','2차시 정확도의 함정', '대결 기간 '+TEST[0]+'–'+TEST[1]+': 무조건 비 안 옴 정확도 '+pct(md.acc)+'(비 맞힘 '+pct(md.recall)+'), 우리 규칙 정확도 '+pct(mr.acc)+'·비 맞힘 '+pct(mr.recall)+', AI 정확도 '+pct(ma.acc)+'·비 맞힘 '+pct(ma.recall));
   var html = scoreTable([{name:'😴 무조건 ‘비 안 옴’',m:md},{name:'📏 우리 규칙',m:mr},{name:'🤖 AI',m:ma}], false)+
-    '<p class="note">시험 기간 '+s.te.length.toLocaleString()+'시각 중 <b>이후 '+H+'시간 안에 비가 온 시각</b>은 '+(md.fn).toLocaleString()+'개(<b>'+pct(md.fn/md.n)+'</b>)뿐입니다. 그래서 “무조건 비 안 옴”만 외쳐도 정확도가 '+pct(md.acc)+'입니다.</p>'+
+    '<p class="note">대결 기간 '+s.te.length.toLocaleString()+'시각 중 <b>이후 '+H+'시간 안에 비가 온 시각</b>은 '+(md.fn).toLocaleString()+'개(<b>'+pct(md.fn/md.n)+'</b>)뿐입니다. 그래서 “무조건 비 안 옴”만 외쳐도 정확도가 '+pct(md.acc)+'입니다.</p>'+
     '<button class="btn" id="trapReveal" type="button">비 온 시간만 따로 보기</button><div id="trapMore"></div>';
   $('trapOut').innerHTML = html;
   $('trapReveal').onclick = function(){
@@ -761,10 +762,10 @@ $('splitBtn').onclick = function(){
   var rows=[], perYear=[];
   var mA=C.evaluate(te,C.predictTree(m)), mR=HYP?C.evaluate(te,rulePredict()):null, mD=C.evaluate(te,function(){return 0;});
   for (var y=c;y<=d;y++){ var t=C.filterRows(FEAT.rows,y,y,se); if(t.length) perYear.push({y:y, m:C.evaluate(t,C.predictTree(m)), share:t.filter(function(r){return r.rain;}).length/t.length}); }
-  saveEv('split','3차시 기간 나누기', '학습 '+a+'–'+b+' → 시험 '+c+'–'+d+'('+$('season').selectedOptions[0].text+'): AI 정확도 '+pct(mA.acc)+'·비 맞힘 '+pct(mA.recall)+(overlap?' (기간 겹침)':''));
-  $('splitOut').innerHTML = (overlap?'<p class="note model">⚠ 학습 기간과 시험 기간이 겹칩니다. AI가 이미 본 자료로 시험하면 성적이 부풀려집니다.</p>':'')+
+  saveEv('split','3차시 기간 나누기', '공부 '+a+'–'+b+' → 대결 '+c+'–'+d+'('+$('season').selectedOptions[0].text+'): AI 정확도 '+pct(mA.acc)+'·비 맞힘 '+pct(mA.recall)+(overlap?' (기간 겹침)':''));
+  $('splitOut').innerHTML = (overlap?'<p class="note model">⚠ 공부 기간과 대결 기간이 겹칩니다. AI가 이미 본 기록으로 겨루면 실력이 부풀려 보입니다.</p>':'')+
     scoreTable([{name:'😴 무조건 ‘비 안 옴’',m:mD}].concat(mR?[{name:'📏 우리 규칙',m:mR}]:[]).concat([{name:'🤖 AI',m:mA}]), true)+
-    '<h3>시험 연도별 — AI의 비 맞힘률</h3>'+bars(perYear.map(function(p){ return {label:p.y+'년 (비 '+pct(p.share,0)+')', v:p.m.recall*100, text:pct(p.m.recall)}; }),100);
+    '<h3>대결 연도별 — AI의 비 맞힘률</h3>'+bars(perYear.map(function(p){ return {label:p.y+'년 (비 '+pct(p.share,0)+')', v:p.m.recall*100, text:pct(p.m.recall)}; }),100);
 };
 $('scoreLoad').onclick = function(){
   jsonp({action:'forecasts'}, function(f){
