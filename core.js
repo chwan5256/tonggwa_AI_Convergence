@@ -56,6 +56,9 @@
   /** 'YYYY-MM-DD HH:MM(:SS)', 'YYYY/MM/DD …', '오전/오후 h:mm:ss', 'AM/PM' 을 KST 로 읽어 ms 로 */
   function parseKST(s) {
     s = String(s || '').trim();
+    // 영문판 SPARKvue: MM/DD/YYYY HH:MM:SS (AM/PM 가능) → YYYY-MM-DD 로 바꿔 아래에서 처리
+    var us = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(.*)$/);
+    if (us) s = us[3] + '-' + us[1] + '-' + us[2] + ' ' + us[4];
     var m = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})[ T]+(오전|오후|AM|PM)?\s*(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
     if (!m) return NaN;
     var h = +m[5], ap = (m[4] || m[8] || '').toUpperCase();
@@ -431,7 +434,7 @@
    */
   function classify(name) {
     var n = name.toLowerCase();
-    if (/^일시|date ?time|^date$/.test(n)) return 'time';
+    if (/^일시|^날짜|date( and)? ?time|^date$/.test(n)) return 'time';
     if (/^시간|^time/.test(n)) return 'elapsed';
     if (/이슬점|풍랭|humidex|습도감안|dew|chill|heat/.test(n)) return null;
     if (/상대 ?습도|relative humidity/.test(n)) return 'rh';
@@ -561,7 +564,7 @@
 
   return {
     lessonCheck: lessonCheck, splitYears: splitYears,
-    VERSION: '0.3.1', HOUR: HOUR, MMHG_TO_HPA: MMHG_TO_HPA,
+    VERSION: '0.3.3', HOUR: HOUR, MMHG_TO_HPA: MMHG_TO_HPA,
     parseCSV: parseCSV, parseKST: parseKST, fmtHour: fmtHour, fmtTime: fmtTime, num: num,
     parseAsosPortal: parseAsosPortal, toSlimCSV: toSlimCSV, parseSlim: parseSlim,
     decodeKorean: decodeKorean, parseAnyWeather: parseAnyWeather, mergeRows: mergeRows, yearCoverage: yearCoverage, readZip: readZip, idbPut: idbPut, idbGet: idbGet,

@@ -14,19 +14,20 @@
  *   - 교사 비밀번호: 편집기에서 SETUP_PIN 에 넣고 setup 실행(저장소에는 비밀번호를 적지 않음)
  *
  * 응답 규칙
- *   - GET  ?action=latest|obs|forecasts|truth|policies|ping|chkwho|gtoken|checkpin|token|settruth  (&callback=fn 이면 JSONP)
+ *   - GET  ?action=latest|obs|forecasts|truth|policies|asosnow|ping|chkwho|gtoken|checkpin|token|settruth  (&callback=fn 이면 JSONP)
  *   - POST body(JSON 문자열, text/plain) : {kind:'live'|'obs'|'forecast'|'truth'|'policy', ...}
  *
  * 단위 규칙(시트에 저장되는 값)
  *   기온 °C · 상대습도 % · 기압 hPa(현지기압) · 풍속 m/s · 풍향 °(북=0, 시계방향)
  */
 
-var VER = '0.3.0';
+var VER = '0.3.3';
 
 /* ★ 교사 화면 입장 — tonggwa2 와 같은 계정·클라이언트 ID */
 /* 비밀번호는 저장소에 적지 않습니다. 편집기에서 아래 SETUP_PIN 에 넣고 setup 을 실행하면
    스크립트 속성 pin 에 저장되고, 그 뒤에는 SETUP_PIN 을 다시 비워도 됩니다. */
 var SETUP_PIN = '';   // ← 편집기에서만 채우기(저장소에는 빈 칸으로 둠)
+var SETUP_KMA_KEY = ''; // ← (선택) 기상청 API허브 인증키. 1차시 ‘기상청 값 자동으로 불러오기’용. 편집기에서만 채우기
 var DEFAULT_WHO = ['cadrical@gmail.com', 'chwan5256@namkang.sen.hs.kr'];  // 허용 계정(공개돼도 됨: 계정 확인은 구글 토큰으로)
 var CLIENT_ID = '1036707162661-v7jeqklr0ga8jlgqm1e36pga4j42mje2.apps.googleusercontent.com';
 var TRY_MAX = 8, TRY_WINDOW = 5 * 60 * 1000, TRY_HOLD = 60 * 1000;   // 틀림 8번 → 1분만 막음(학생이 일부러 막아도 오래가지 않게)
@@ -54,6 +55,7 @@ function setup() {
     props.setProperty('WRITE_TOKEN', Utilities.getUuid().slice(0, 8));
   }
   if (SETUP_PIN) props.setProperty('pin', String(SETUP_PIN).trim());
+  if (SETUP_KMA_KEY) props.setProperty('KMA_KEY', String(SETUP_KMA_KEY).trim());
   if (!props.getProperty('pin')) throw new Error('교사 비밀번호가 없습니다. 위쪽 SETUP_PIN 에 비밀번호를 넣고 setup 을 다시 실행하세요.');
   props.setProperty('clientid', CLIENT_ID);
   // 구글 로그인 확인(UrlFetchApp)에 필요한 권한을 여기서 함께 받는다. 응답 코드 400 이 정상.
@@ -72,6 +74,7 @@ function doGet(e) {
     else if (action === 'forecasts') out = cached_('forecasts', buildForecasts_);
     else if (action === 'truth') out = cached_('truth', buildTruth_);
     else if (action === 'policies') out = cached_('policies', buildPolicies_);
+    else if (action === 'asosnow') out = asosNow_(p.tm);
     else if (action === 'chkwho') out = { ok: allowed_(p.email), ver: VER };
     else if (action === 'gtoken') out = gToken_(p);
     else if (action === 'checkpin') out = { ok: pinOk_(p.pin), ver: VER };
@@ -167,6 +170,37 @@ function savePolicy_(b) {
   sheet_('policy').appendRow(row);
   CacheService.getScriptCache().remove('policies');
   return 1;
+}
+
+/* ---------- 1차시: 같은 시각 기상청 서울(108) 기온 ----------
+   기상청 API허브 지상관측 시간자료(kma_sfctm2). help=1 로 받은 머리글의 열 이름(TA)으로 위치를 찾는다.
+   ⚠ 응답 형식은 실제 키로 한 번 시험해야 함. 실패하면 학생 화면은 직접 입력으로 넘어간다. */
+function asosNow_(tm) {
+  tm = String(tm || '').replace(/\D/g, '');
+  if (!/^\d{12}$/.test(tm)) return { ok: false, error: '시각 형식 오류' };
+  var key = PropertiesService.getScriptProperties().getProperty('KMA_KEY');
+  if (!key) return { ok: false, error: '선생님이 기상청 API 키를 아직 설정하지 않았습니다' };
+  var cache = CacheService.getScriptCache(), hit = cache.get('asos_' + tm);
+  if (hit) return JSON.parse(hit);
+  try {
+    var url = 'https://apihub.kma.go.kr/api/typ01/url/kma_sfctm2.php?tm=' + tm + '&stn=108&help=1&authKey=' + encodeURIComponent(key);
+    var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (res.getResponseCode() !== 200) return { ok: false, error: '기상청 응답 ' + res.getResponseCode() };
+    var lines = res.getContentText('EUC-KR').split(/\r?\n/), head = null, row = null;
+    lines.forEach(function (l) {
+      var t = l.replace(/^#\s*/, '').trim().split(/\s+/);
+      if (/^#/.test(l) && t.indexOf('YYMMDDHHMI') === 0 && t.indexOf('TA') > 0) head = t;
+      else if (!/^#/.test(l) && /^\d{12}\s+108\b/.test(l.trim())) row = l.trim().split(/\s+/);
+    });
+    if (!head || !row) return { ok: false, error: '기상청 응답에서 기온을 찾지 못했습니다' };
+    var ta = Number(row[head.indexOf('TA')]);
+    if (!isFinite(ta) || ta <= -50) return { ok: false, error: '그 시각 기온이 결측입니다' };
+    var out = { ok: true, tm: tm, ta: ta };
+    cache.put('asos_' + tm, JSON.stringify(out), 600);
+    return out;
+  } catch (err) {
+    return { ok: false, error: String(err).slice(0, 120) };
+  }
 }
 
 /* ---------- 교사 화면 입장(tonggwa2 와 같은 방식) ----------

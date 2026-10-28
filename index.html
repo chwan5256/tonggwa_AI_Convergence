@@ -172,7 +172,8 @@ svg text{font-family:var(--sans)}
     <input type="file" id="obsFile" accept=".csv">
   </div>
   <div id="obsRunRow" class="row hidden"><label>실행 번호 <select id="obsRun"></select></label>
-    <label id="obsStartWrap" class="hidden">측정 시작 시각 <input type="text" id="obsStart" placeholder="2026-10-27 14:20" size="16"></label></div>
+    <label id="obsStartWrap" class="hidden">측정 시작 시각(이 파일에는 시각 열이 없음) <input type="datetime-local" id="obsStart"></label></div>
+  <p class="note">CSV에 실행(Run)이 여러 개 있으면 오늘 측정한 실행을 고르세요. 시각은 파일의 ‘일시(Date and Time)’ 열에서 자동으로 읽습니다.</p>
   <div id="obsOut"></div>
   <div class="row"><button class="btn hidden" id="obsSend" type="button">반 관측망에 보내기</button><span id="obsMsg" class="note hidden"></span></div>
 </section>
@@ -180,8 +181,11 @@ svg text{font-family:var(--sans)}
   <h2><span class="n">03</span>반 관측망 비교</h2>
   <div class="row">
     <button class="btn ghost" id="obsLoad" type="button">반 자료 불러오기</button>
-    <label>같은 시각 기상청 서울(ASOS) 기온 <input type="number" step="0.1" id="asosRef" style="width:90px"> °C</label>
+    <span id="obsWhen" class="tag"></span>
   </div>
+  <div class="row"><label>같은 시각 기상청 서울(ASOS) 기온 <input type="number" step="0.1" id="asosRef" style="width:90px"> °C</label>
+    <button class="btn ghost" id="asosNow" type="button">기상청 값 자동으로 불러오기</button><span id="asosMsg" class="tag"></span></div>
+  <p class="note">웹앱에 들어 있는 기상청 자료는 <b>2016~2025년의 지난 기록</b>(2차시 빅데이터용)이라 오늘 측정 시각의 값은 없습니다. 오늘 값은 [기상청 값 자동으로 불러오기]로 가져오거나(선생님이 기상청 API 키를 설정한 경우), 기상청 날씨누리에서 ‘서울’ 현재 기온을 보고 직접 넣습니다.</p>
   <div id="obsCompare"></div>
   <p class="note">토의: 지점마다 기온이 다른 까닭(햇빛, 바닥 재질, 바람, 건물)은? 관측소 한 곳의 값으로 예보하면 우리 학교에서는 어떤 오차가 생길까?</p>
 </section>
@@ -688,7 +692,8 @@ $('obsFile').onchange = function(){
   f.text().then(function(t){
     try{ OBS = C.parseSparkvue(t); }catch(e){ $('obsOut').innerHTML='<p class="note">'+esc(e.message)+'</p>'; return; }
     var runs=Object.keys(OBS);
-    $('obsRun').innerHTML = runs.map(function(r){ return '<option value="'+r+'">실행 '+r+'</option>'; }).join('');
+    $('obsRun').innerHTML = runs.map(function(r){ var o=OBS[r], t=o.hasClock&&o.rows.length?C.fmtTime(o.rows[0].ms).slice(0,16):'시각 없음';
+      return '<option value="'+r+'">실행 '+r+' · '+t+' 시작 · '+o.rows.length+'점</option>'; }).join('');
     $('obsRun').value = runs[runs.length-1];
     $('obsRunRow').classList.remove('hidden');
     renderObs();
@@ -717,11 +722,28 @@ $('obsSend').onclick = function(){
     .then(function(){ $('obsMsg').textContent='전송 요청함 — 03에서 반 자료를 불러와 우리 모둠이 보이면 저장된 것'; $('obsMsg').classList.remove('hidden'); })
     .catch(function(e){ $('obsMsg').textContent='보내지 못함: '+e.message; $('obsMsg').classList.remove('hidden'); });
 };
+var OBS_HOUR=NaN;
+$('asosNow').onclick = function(){
+  if (isNaN(OBS_HOUR)){ $('asosMsg').textContent='먼저 [반 자료 불러오기]를 누르세요'; return; }
+  var tm=C.fmtHour(OBS_HOUR).replace(/[-: ]/g,'');
+  $('asosMsg').textContent='불러오는 중…';
+  jsonp({action:'asosnow', tm:tm}, function(d){
+    if(!d.ok){ $('asosMsg').textContent=(d.error||'불러오지 못함')+' — 날씨누리 값을 직접 넣어 주세요'; return; }
+    $('asosRef').value=d.ta; $('asosMsg').textContent='기상청 서울(108) '+C.fmtHour(OBS_HOUR)+' 관측값'; $('obsLoad').click();
+  });
+};
 $('obsLoad').onclick = function(){
   jsonp({action:'obs'}, function(d){
     if(!d.ok){ $('obsCompare').innerHTML='<p class="note">'+esc(d.error)+'</p>'; return; }
     var cls=$('cls').value+'반-', g={};
-    d.rows.filter(function(r){ return String(r.group).indexOf(cls)===0; }).forEach(function(r){
+    var mine=d.rows.filter(function(r){ return String(r.group).indexOf(cls)===0; });
+    // 가장 최근 측정한 날의 자료만 비교(다른 날 자료가 섞이지 않게)
+    var lastDay=mine.reduce(function(m,r){ var t=String(r.ts).slice(0,10); return t>m?t:m; },'');
+    mine=mine.filter(function(r){ return String(r.ts).slice(0,10)===lastDay; });
+    var mid=mine.map(function(r){ return C.parseKST(r.ts); }).filter(function(v){return !isNaN(v);}).sort(function(a,b){return a-b;});
+    OBS_HOUR = mid.length ? Math.round(mid[Math.floor(mid.length/2)]/C.HOUR)*C.HOUR : NaN;  // 측정 시각 가운데값에 가장 가까운 정시
+    $('obsWhen').textContent = mine.length ? lastDay+' 측정 · 기준 시각 '+C.fmtHour(OBS_HOUR).slice(11) : '';
+    mine.forEach(function(r){
       var k=r.group+' · '+r.place; (g[k]=g[k]||[]).push(Number(r.ta)); });
     var items=Object.keys(g).sort().map(function(k){ var a=g[k].filter(function(v){return !isNaN(v);}); return {label:k, v:a.length?a.reduce(function(s,v){return s+v;},0)/a.length:NaN}; })
       .filter(function(x){ return !isNaN(x.v); });
