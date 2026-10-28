@@ -529,8 +529,39 @@
     };
   }
 
+  /* ---------------- 수업 전 점검표: 원자료로 2·3차시 실제 숫자를 미리 계산 ----------------
+     학생 화면과 같은 함수(buildFeatures·crossTab·verdict·trainTree·evaluate)만 써서 값이 어긋나지 않게 한다. */
+  /** 학습·시험 기간 규칙(학생 화면과 점검표가 함께 씀): 마지막 3년 = 시험, 나머지 = 학습. 4년 미만이면 같은 기간 */
+  function splitYears(R) {
+    var ys = R.map(function (r) { return r.year; }), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    return y1 - y0 >= 3 ? { train: [y0, y1 - 3], test: [y1 - 2, y1], y0: y0, y1: y1 } : { train: [y0, y1], test: [y0, y1], y0: y0, y1: y1 };
+  }
+  function lessonCheck(rows, H) {
+    var F = buildFeatures(rows, H || 6), R = F.rows;
+    var SP = splitYears(R), TR = SP.train, TE = SP.test;
+    var tr = filterRows(R, TR[0], TR[1]), te = filterRows(R, TE[0], TE[1]);
+    var share = function (a) { return a.length ? a.filter(function (r) { return r.rain; }).length / a.length : NaN; };
+    var hyps = Object.keys(HYPS).map(function (k) {
+      var h = HYPS[k], cf = condFn({ feature: h.feature, op: h.op, th: h.def });
+      var ct = crossTab(tr, cf), pm = tr.filter(function (r) { return r.hour >= 13 && r.hour <= 17; });
+      var ctPm = crossTab(pm, cf);
+      return { key: k, text: h.text(h.def), ct: ct, verdict: verdict(ct).label, pm: ctPm, pmVerdict: verdict(ctPm).label };
+    });
+    var dry = evaluate(te, function () { return 0; });
+    var rule = evaluate(te, ruleFn([{ feature: 'dp3', op: '<=', th: HYPS.pressure.def }]));
+    var model = trainTree(tr, { maxDepth: 3 }), ai = evaluate(te, predictTree(model));
+    var nR = tr.filter(function (r) { return r.rain; }).length, k = (tr.length - nR) / nR;
+    var modelW = trainTree(tr, { maxDepth: 3, weightRain: k }), aiW = evaluate(te, predictTree(modelW));
+    var perYear = [];
+    for (var y = TE[0]; y <= TE[1]; y++) { var t = filterRows(R, y, y); if (t.length) perYear.push({ year: y, n: t.length, rain: share(t), ai: evaluate(t, predictTree(model)) }); }
+    return { H: F.H, rows: R.length, dropped: F.dropped, TR: TR, TE: TE, rainAll: share(R), rainTr: share(tr), rainTe: share(te),
+      hyps: hyps, dry: dry, rule: rule, ai: ai, aiW: aiW, weight: k, root: model.root.split ? questionText(model.root.split) : '(나누지 않음)',
+      importance: model.importance, perYear: perYear };
+  }
+
   return {
-    VERSION: '0.3.0', HOUR: HOUR, MMHG_TO_HPA: MMHG_TO_HPA,
+    lessonCheck: lessonCheck, splitYears: splitYears,
+    VERSION: '0.3.1', HOUR: HOUR, MMHG_TO_HPA: MMHG_TO_HPA,
     parseCSV: parseCSV, parseKST: parseKST, fmtHour: fmtHour, fmtTime: fmtTime, num: num,
     parseAsosPortal: parseAsosPortal, toSlimCSV: toSlimCSV, parseSlim: parseSlim,
     decodeKorean: decodeKorean, parseAnyWeather: parseAnyWeather, mergeRows: mergeRows, yearCoverage: yearCoverage, readZip: readZip, idbPut: idbPut, idbGet: idbGet,

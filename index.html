@@ -311,8 +311,8 @@ svg text{font-family:var(--sans)}
 <section class="step">
   <h2><span class="n">01</span>쟁점: 날씨 예보를 AI에게 맡겨도 될까?<span class="min">5분</span></h2>
   <div class="grid2">
-    <div class="card"><h3>⚠ 상황 (수업용 가상 상황)</h3><p>AI 예보는 “오늘 저녁 비 안 옴”이었습니다. 그런데 저녁에 짧고 강한 비가 쏟아져 하천 산책로가 잠겼습니다. 사람 예보관도 이런 비를 놓칠 수 있고, 반대로 AI가 사람보다 먼저 위험을 알아챈 날도 있을 수 있습니다. 3차시에서 따져 본 것처럼, 과거 자료로 배운 AI가 드문 날씨를 얼마나 맞힐 수 있는지는 아직 따져 볼 문제입니다. 이 오보의 책임은 누구에게 있을까요?</p></div>
-    <div class="card"><h3>⚡ 데이터센터(AI 포함)의 전기</h3><p>전 세계 데이터센터 전체의 전력 소비는 2024년 약 415 TWh로 <b>추정</b>되고, 2030년에는 약 945 TWh까지 늘어날 것으로 <b>전망</b>됩니다(IEA, 2025, 기준 시나리오). 날씨 AI만의 값이 아닙니다. 한편 AI 예보 모델은 학습이 끝나면 예보 계산 자체는 기존 수치예보보다 훨씬 빠르다고 알려져 있습니다(GraphCast). 단, 예보의 출발점(초기값)은 여전히 기존 관측과 수치예보 자료에 기대고 있습니다. <a href="https://www.iea.org/reports/energy-and-ai" target="_blank" rel="noopener">IEA 보고서</a></p></div>
+    <div class="card"><h3>⚠ 상황 (수업용 가상 상황)</h3><p>AI 예보는 “오늘 저녁까지 비 안 옴”이었습니다. 그런데 저녁에 짧고 강한 비가 쏟아져 하천 산책로가 잠겼습니다. 사람 예보관도 이런 비를 놓칠 수 있고, 반대로 AI가 사람보다 먼저 위험을 알아챈 날도 있을 수 있습니다. 3차시에서 따져 본 것처럼, 과거 자료로 배운 AI가 드문 날씨를 얼마나 맞힐 수 있는지는 아직 따져 볼 문제입니다. 이 오보의 책임은 누구에게 있을까요?</p></div>
+    <div class="card"><h3>⚡ 데이터센터(AI 포함)의 전기</h3><p>전 세계 데이터센터 전체의 전력 소비는 2024년 약 415 TWh로 <b>추정</b>되고, 2030년에는 약 945 TWh까지 늘어날 것으로 <b>전망</b>됩니다(IEA, 2025, 기준 시나리오). 날씨 AI만의 값이 아닙니다. 기존 수치예보도 슈퍼컴퓨터로 전력을 씁니다. AI 예보 모델은 학습에 큰 계산이 들지만, 학습이 끝나면 예보 계산 자체는 기존 수치예보보다 훨씬 빠르다고 보고되었습니다(GraphCast, Lam et al., 2023, <i>Science</i>). 단, 예보의 출발점(초기값)은 여전히 기존 관측과 수치예보 자료에 기대고 있습니다. <a href="https://www.iea.org/reports/energy-and-ai" target="_blank" rel="noopener">IEA 보고서</a></p></div>
   </div>
   <p class="q">우리 사회는 날씨 예보를 AI에게 얼마나, 어떤 조건에서 맡겨야 할까?</p>
 </section>
@@ -326,12 +326,14 @@ svg text{font-family:var(--sans)}
 
 <section class="step">
   <h2><span class="n">03</span>이해관계자 역할<span class="min">8분</span></h2>
+  <p>모둠의 <b>대표 역할 1개</b>를 고릅니다(제출용). 활동지 3번에는 대표 역할의 이점·위험을 각 1개 이상, 다른 역할도 1개 이상 더 씁니다.</p>
   <div class="grid3" id="roleList"></div>
   <p class="note" id="roleQ">역할을 고르면 그 관점에서 생각할 질문이 나옵니다.</p>
 </section>
 
 <section class="step">
-  <h2><span class="n">04</span>과학 윤리에 근거한 조건부 정책 제안서<span class="min">15분</span></h2>
+  <h2><span class="n">04</span>과학 윤리에 근거한 정책 제안서(적용 조건 포함)<span class="min">15분</span></h2>
+  <p class="note">찬성·조건부 찬성·반대 어느 입장도 정답이 아닙니다. 어떤 입장이든 <b>“어떤 조건에서 그렇게 해야 하는가(반대라면 어떤 조건이 갖춰지면 입장이 바뀌는가)”</b>를 밝히면 조건부 해결 방안이 됩니다.</p>
   <div class="row"><b>입장</b>
     <label><input type="radio" name="stance" value="찬성"> 찬성</label>
     <label><input type="radio" name="stance" value="조건부 찬성"> 조건부 찬성</label>
@@ -341,6 +343,7 @@ svg text{font-family:var(--sans)}
   <div id="prinList"></div>
   <textarea id="rebut" placeholder="예상 반론 1개와 그에 대한 재반박(또는 수용)"></textarea>
   <div class="row"><button class="btn ghost" id="polPrev" type="button">제안서 미리 보기</button><button class="btn" id="polSend" type="button">제출</button><span id="polMsg" class="tag"></span></div>
+  <p class="note">제출한 내용은 선생님 시트에 저장되고 우리 반 대시보드에 보입니다. <b>이름·학번 등 개인정보는 쓰지 마세요.</b></p>
   <div id="polOut"></div>
 </section>
 
@@ -352,11 +355,12 @@ svg text{font-family:var(--sans)}
 
 <section class="step">
   <h2><span class="n">06</span>점검과 성찰<span class="min">5분</span></h2>
+  <p>입장과 상관없이, 근거와 조건으로 점검합니다(찬성·반대도 적용 조건을 밝히면 ‘조건부 해결 방안’).</p>
   <table class="t"><tr><th>수준</th><th class="l">[10통과2-03-04] 수업 점검 기준(교사 설계)</th></tr>
     <tr><td>상</td><td class="l">AI 기상예보를 둘러싼 SSI에서 여러 이해관계자의 관점을 분석하고, 과학 윤리에 근거한 조건부 해결 방안을 논증한다.</td></tr>
     <tr><td>중</td><td class="l">SSI에 대한 자신의 입장을 근거와 함께 제시하고, 과학 윤리의 중요성을 설명한다.</td></tr>
     <tr><td>하</td><td class="l">SSI에 대한 자신의 입장을 제시한다.</td></tr></table>
-  <p class="note">성찰: 4차시 동안 내 생각이 바뀐 지점은? 과학기술을 이용할 때 내가 꼭 지키고 싶은 조건 한 가지는?</p>
+  <p class="note">성찰(각자): ① 4차시 동안 내 생각이 바뀐 지점은? ② 과학기술을 이용할 때 내가 꼭 지키고 싶은 조건 한 가지는? ③ 4차시 프로젝트에서 가장 설득력 있던 근거는?</p>
 </section>
 </div>
 
@@ -472,9 +476,8 @@ function lineChart(pts, opt){
 var RAW=null, FEAT=null;
 function setData(rows, label){
   RAW = rows; FEAT = C.buildFeatures(rows, H);
-  var ys = FEAT.rows.map(function(r){return r.year;});
-  var yMin = Math.min.apply(null,ys), yMax = Math.max.apply(null,ys);
-  if (yMax - yMin >= 3) { TEST=[yMax-2,yMax]; TRAIN=[yMin,yMax-3]; } else { TRAIN=[yMin,yMax]; TEST=[yMin,yMax]; }
+  var SP = C.splitYears(FEAT.rows), yMin = SP.y0, yMax = SP.y1;   // 교사 점검표와 같은 규칙
+  TRAIN = SP.train; TEST = SP.test;
   var rainShare = FEAT.rows.filter(function(r){return r.rain;}).length / FEAT.rows.length;
   $('dataDot').className='dot ok';
   $('dataTxt').innerHTML = '<b>'+esc(label)+'</b> · '+yMin+'–'+yMax+' · '+FEAT.rows.length.toLocaleString()+'시간 · 앞으로 '+H+'시간 안 비 기준';
@@ -802,10 +805,10 @@ var ROLES = {
   '기상청 예보관': 'AI가 더 빠르고 싸게 예보를 만든다면 예보관은 무엇에 더 집중할 수 있을까? AI 예보와 내 판단이 다를 때 누가 최종 결정을 해야 할까?',
   'AI 개발 기업': 'AI 예보의 장점은 무엇이고, 한계를 사용자에게 어떻게 알려야 할까? 학습 자료는 공정한가?',
   '재난 대응 기관': '비를 놓치는 것과 헛경보 중 무엇이 더 위험할까? 어떤 기준으로 경보를 내려야 할까?',
-  '환경 단체': 'AI 계산에 드는 전기는 기후 변화에 어떤 영향을 줄까? 그 대가를 감수할 만한가?'
+  '환경 단체': '기존 수치예보와 비교해 AI 예보의 전력·자원 부담은 어떤가? 더 정확한 예보가 재난 피해를 줄인다면 그 대가를 어떻게 따져야 할까?'
 };
 var PRINS = { '책임': '오보가 났을 때 누가 어떻게 책임지는가', '투명성': 'AI가 왜 그렇게 예보했는지, 한계가 무엇인지 공개하는가',
-  '공정성': '지역·계층에 따라 예보 정확도나 혜택이 달라지지 않는가', '지속 가능성': '전력·자원 사용이 기후와 환경에 부담을 주지 않는가' };
+  '공정성': '지역·계층에 따라 예보 정확도나 혜택이 달라지지 않는가', '지속 가능성': '전력·자원 사용이 기후와 환경에 부담을 주지 않는가' };  // 교안·활동지와 같은 문구
 var ROLE = LS.get('role','');
 $('roleList').innerHTML = Object.keys(ROLES).map(function(k){ return '<button type="button" class="card pick" data-r="'+k+'" aria-pressed="'+(ROLE===k)+'"><h3>'+k+'</h3></button>'; }).join('');
 function showRole(){ document.querySelectorAll('#roleList .pick').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.r===ROLE); });

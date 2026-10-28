@@ -289,11 +289,30 @@ function render(log){
     '이후 6시간 안 비(0.1 mm 이상) 비율: '+(rain/F.rows.length*100).toFixed(1)+'%\n취득일: '+C.fmtTime(Date.now()).slice(0,10)+'\n학생 배포: 웹앱 내장(data/asos_108_hourly.csv)';
   var url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   $('asosOut').innerHTML='<p class="note">이번에 넣은 파일<br>'+log.join('<br>')+'<br><b>지금까지 합친 파일 '+LOADED.length+'개</b> (더 넣으면 계속 합쳐집니다)</p>'+(warn.length?'<p class="bad">⚠ '+warn.join('<br>⚠ ')+'</p>':'<p class="ok">✔ '+ys[0]+'–'+ys[ys.length-1]+' 연속, 빠진 해 없음</p>')+tbl+
+    '<div class="row"><button class="btn ghost" id="chkBtn" type="button">실제 숫자로 2·3차시 수업 전 점검</button><label>예보 범위 <select id="chkH"><option value="6">6시간(기본)</option><option value="12">12시간</option><option value="24">24시간</option></select></label></div><div id="chkOut"></div>'+
     '<div class="row"><a class="btn" download="asos_108_hourly.csv" href="'+url+'">asos_108_hourly.csv 내려받기 ('+(csv.length/1e6).toFixed(1)+' MB)</a>'+
     '<button class="btn ghost" id="tryHere" type="button">커밋 전에 이 브라우저에서 바로 써 보기</button><button class="btn ghost" id="clearAll" type="button">처음부터 다시</button><span id="tryMsg"></span></div>'+
     '<p>아래 데이터 카드를 <code>data/README.md</code>에 붙여 넣으세요.</p><textarea readonly>'+card+'</textarea>';
   $('clearAll').onclick=function(){ LOADED=[]; $('asosOut').innerHTML=''; };
+  $('chkBtn').onclick=function(){ $('chkOut').innerHTML='<p class="note">계산 중…</p>'; setTimeout(function(){ showCheck(C.lessonCheck(slim,+$('chkH').value)); },30); };
   $('tryHere').onclick=function(){ C.idbPut('asos', csv).then(function(){ $('tryMsg').innerHTML=' <span class="ok">저장됨 — 이 브라우저에서 학생 화면을 열면 이 자료로 동작(다른 기기는 커밋 후)</span>'; }).catch(function(e){ $('tryMsg').textContent=' 저장 실패: '+e.message; }); };
+}
+
+/* 수업 전 점검표 — 학생 화면과 같은 함수로 계산한 실제 숫자 */
+function showCheck(x){
+  var P=function(v){ return isNaN(v)?'—':(v*100).toFixed(1)+'%'; }, X=function(v){ return isNaN(v)?'—':v.toFixed(2)+'배'; };
+  var M=function(m){ return '정확도 '+P(m.acc)+' · 비 맞힘 '+P(m.recall)+' · 놓침 '+m.fn.toLocaleString()+' · 헛경보 '+m.fp.toLocaleString(); };
+  var rows=x.hyps.map(function(h){ return '<tr><td>'+esc(h.text)+'</td><td class="num">'+h.ct.nCond.toLocaleString()+'</td><td class="num">'+P(h.ct.pCond)+' / '+P(h.ct.pBase)+'</td><td class="num">'+(isNaN(h.ct.ratio)?'—':h.ct.ratio.toFixed(2))+'</td><td>'+esc(h.verdict)+'</td><td>'+(isNaN(h.pm.ratio)?'—':h.pm.ratio.toFixed(2))+' · '+esc(h.pmVerdict)+'</td></tr>'; }).join('');
+  var txt=['[수업 전 점검표] 기준: 앞으로 '+x.H+'시간 강수 0.1 mm 이상 · 학습 '+x.TR.join('–')+' / 시험 '+x.TE.join('–'),
+    '학습 행 '+x.rows+' (제외 '+x.dropped+') · 비 시간 비율 전체 '+P(x.rainAll)+' · 학습 '+P(x.rainTr)+' · 시험 '+P(x.rainTe)]
+    .concat(x.hyps.map(function(h){ return '가설 '+h.text+': 조건 '+h.ct.nCond+'시간, '+P(h.ct.pCond)+' vs 평소 '+P(h.ct.pBase)+' = '+X(h.ct.ratio)+' → '+h.verdict+' / 오후(13~17시)만 '+X(h.pm.ratio)+' → '+h.pmVerdict; }))
+    .concat(['무조건 비 안 옴: '+M(x.dry),'규칙(3시간 동안 기압 1 hPa 이상 하강): '+M(x.rule),'AI(깊이 3): '+M(x.ai)+' · 첫 질문 “'+x.root+'”','AI(비 놓침 벌점 '+x.weight.toFixed(1)+'배): '+M(x.aiW),
+      'AI 변수 중요도: '+x.importance.map(function(i){ return i.name+' '+(i.value*100).toFixed(0)+'%'; }).join(', ')])
+    .concat(x.perYear.map(function(y){ return y.year+'년: 비 비율 '+P(y.rain)+', AI 비 맞힘 '+P(y.ai.recall); })).join('\n');
+  $('chkOut').innerHTML='<p class="note">학생 화면과 같은 계산 함수로 구한 값입니다. 수업 전에 발문·활동지 예시와 맞는지 확인하세요.</p>'+
+    '<table><tr><th>가설(기본 기준값, 학습 기간)</th><th class="num">조건 시간</th><th class="num">조건일 때 / 평소</th><th class="num">배수</th><th>판정</th><th>오후(13~17시)만</th></tr>'+rows+'</table>'+
+    '<table><tr><th>시험 기간 '+x.TE.join('–')+'</th><th>결과</th></tr><tr><td>😴 무조건 비 안 옴</td><td>'+M(x.dry)+'</td></tr><tr><td>📏 규칙(3시간 동안 기압 1 hPa 이상 하강)</td><td>'+M(x.rule)+'</td></tr><tr><td>🤖 AI(깊이 3)</td><td>'+M(x.ai)+'</td></tr><tr><td>🤖 AI(비 놓침 벌점)</td><td>'+M(x.aiW)+'</td></tr></table>'+
+    '<p>점검표 전체(복사해 두기):</p><textarea readonly>'+esc(txt)+'</textarea>';
 }
 })();
 </script>
