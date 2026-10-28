@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 예보관 · 속담 vs 빅데이터 vs AI</title>
+<meta name="description" content="통합과학2 Ⅲ. 과학과 미래 사회 — 기상청 10년 빅데이터와 우리 학교 무선센서로 날씨 속담을 검증하고 AI 예보관을 만드는 AI 융합수업 웹앱">
+<style>
+:root{
+  --ground:#F7F5F1; --surface:#FFFFFF; --surface-2:#F1EEE8;
+  --ink:#191E22; --ink-soft:#525A62; --ink-faint:#656D74;
+  --rule:#DFD9CF; --rule-soft:#EBE6DE;
+  --accent:#1D5E6B; --accent-wash:#E4EEEF; --on-accent:#FFFFFF;
+  --ochre:#8A5A22; --ochre-wash:#F3EADC;
+  --danger:#9B3626; --danger-wash:#F6E7E3;
+  --good:#1F6B3A; --good-wash:#E4F0E8;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#7a8a96;
+  --s1-ink:#1A5AAB; --s2-ink:#B34413;
+  --chart-grid:#E8E4DC; --chart-axis:#B9B2A6;
+  --shadow:0 1px 2px rgba(25,30,34,.05),0 8px 24px -12px rgba(25,30,34,.18);
+  --sans:"Pretendard","IBM Plex Sans KR",-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#131719; --surface:#1A1F22; --surface-2:#20262A;
+  --ink:#EDEAE4; --ink-soft:#AEB5BB; --ink-faint:#949BA1;
+  --rule:#2C3439; --rule-soft:#242B30;
+  --accent:#63B4C0; --accent-wash:#16323A; --on-accent:#0F1416;
+  --ochre:#D0A264; --ochre-wash:#2C2519; --danger:#E0806B; --danger-wash:#33201C;
+  --good:#6FBE8B; --good-wash:#18291E;
+  --s1:#3987e5; --s2:#d95926; --s3:#8d9aa4; --s1-ink:#7DB4F0; --s2-ink:#EE9270;
+  --chart-grid:#2A3237; --chart-axis:#525A62;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+}}
+:root[data-theme="dark"]{
+  --ground:#131719; --surface:#1A1F22; --surface-2:#20262A;
+  --ink:#EDEAE4; --ink-soft:#AEB5BB; --ink-faint:#949BA1;
+  --rule:#2C3439; --rule-soft:#242B30;
+  --accent:#63B4C0; --accent-wash:#16323A; --on-accent:#0F1416;
+  --ochre:#D0A264; --ochre-wash:#2C2519; --danger:#E0806B; --danger-wash:#33201C;
+  --good:#6FBE8B; --good-wash:#18291E;
+  --s1:#3987e5; --s2:#d95926; --s3:#8d9aa4; --s1-ink:#7DB4F0; --s2-ink:#EE9270;
+  --chart-grid:#2A3237; --chart-axis:#525A62;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.topbar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--rule)}
+.topbar .wrap{display:flex;align-items:center;gap:14px;min-height:56px;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.brand small{font-weight:500;color:var(--ink-faint);margin-left:6px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{border:1px solid transparent;background:none;color:var(--ink-soft);font:inherit;font-size:14.5px;padding:6px 12px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--on-accent)}
+.spacer{flex:1}
+.who{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--ink-soft)}
+select,input[type=text],input[type=number],input[type=date],textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:6px 9px}
+textarea{width:100%;min-height:84px;resize:vertical}
+.btn{font:inherit;font-size:15px;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);padding:8px 16px;border-radius:10px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.tbtn{font:inherit;font-size:13px;border:1px solid var(--rule);background:var(--surface);color:var(--ink-soft);border-radius:8px;padding:4px 10px;cursor:pointer}
+header.mast{padding:30px 0 10px}
+.eyebrow{font-size:12.5px;letter-spacing:.12em;color:var(--ochre);font-weight:700;margin:0 0 6px}
+h1{font-size:clamp(26px,4vw,38px);line-height:1.25;margin:0 0 8px;letter-spacing:-.02em}
+.dek{color:var(--ink-soft);margin:0 0 12px;max-width:60em}
+.datachip{display:inline-flex;gap:8px;align-items:center;font-size:13.5px;border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:4px 12px;color:var(--ink-soft)}
+.datachip b{color:var(--ink)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--chart-axis)}
+.dot.ok{background:var(--good)} .dot.warn{background:var(--ochre)} .dot.bad{background:var(--danger)}
+section.step{background:var(--surface);border:1px solid var(--rule);border-radius:16px;box-shadow:var(--shadow);padding:22px 24px;margin:18px 0}
+section.step h2{font-size:21px;margin:0 0 10px;display:flex;gap:10px;align-items:baseline;letter-spacing:-.01em}
+section.step h2 .n{font-family:var(--mono);font-size:13px;color:var(--on-accent);background:var(--accent);border-radius:6px;padding:1px 7px}
+section.step h2 .min{margin-left:auto;font-size:13px;font-weight:500;color:var(--ink-faint)}
+.q{font-size:19px;font-weight:700;border-left:4px solid var(--ochre);padding:6px 0 6px 14px;margin:6px 0 14px}
+.note{font-size:14px;color:var(--ink-soft);background:var(--surface-2);border-radius:10px;padding:10px 14px;margin:12px 0}
+.note.model{border-left:4px solid var(--ochre)}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.card{border:1px solid var(--rule);border-radius:12px;padding:14px 16px;background:var(--surface)}
+.card h3{margin:0 0 6px;font-size:16.5px}
+.card p{margin:0;color:var(--ink-soft);font-size:14.5px}
+.pick{cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.pick[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset;background:var(--accent-wash)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.hyp{font-size:18px;font-weight:700;background:var(--accent-wash);border-radius:10px;padding:12px 16px;margin:12px 0}
+.hyp em{font-style:normal;color:var(--s2-ink)}
+table.t{border-collapse:collapse;width:100%;font-size:14.5px;margin:8px 0}
+table.t th,table.t td{border:1px solid var(--rule);padding:6px 9px;text-align:center}
+table.t th{background:var(--surface-2);font-weight:600}
+table.t td.l,table.t th.l{text-align:left}
+.num{font-variant-numeric:tabular-nums}
+.bars{display:grid;gap:8px;margin:10px 0}
+.bar{display:grid;grid-template-columns:minmax(120px,190px) 1fr 70px;gap:10px;align-items:center;font-size:14.5px}
+.bar .track{height:22px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.bar .fill{height:100%;border-radius:6px}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.verdict{display:inline-block;font-weight:700;border-radius:8px;padding:6px 12px;margin:6px 0}
+.verdict.good{background:var(--good-wash);color:var(--good)}
+.verdict.ochre{background:var(--ochre-wash);color:var(--ochre)}
+.verdict.muted{background:var(--surface-2);color:var(--ink-soft)}
+.verdict.danger{background:var(--danger-wash);color:var(--danger)}
+.tree ul{list-style:none;margin:0;padding-left:22px;border-left:2px solid var(--rule-soft)}
+.tree>ul{padding-left:0;border:0}
+.tree li{margin:6px 0}
+.tree .qn{display:inline-block;background:var(--accent-wash);border-radius:8px;padding:4px 10px;font-weight:600}
+.tree .yn{font-size:13px;color:var(--ink-faint);margin-right:4px}
+.tree .leaf{display:inline-block;border-radius:8px;padding:3px 10px;font-weight:700}
+.leaf.rain{background:var(--s1);color:#fff} .leaf.dry{background:var(--surface-2);color:var(--ink-soft)}
+.tree .meta{font-size:13px;color:var(--ink-faint);margin-left:6px}
+.hidden{display:none!important}
+.big{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.fc{border:2px solid var(--ink);border-radius:14px;padding:16px 18px;background:var(--surface);max-width:560px}
+.fc h3{margin:0 0 4px}
+.fc .three{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.fc .three div{border:1px solid var(--rule);border-radius:10px;padding:8px;text-align:center}
+.fc .three b{display:block;font-size:22px}
+.tag{display:inline-block;font-size:12.5px;border:1px solid var(--rule);border-radius:999px;padding:1px 9px;color:var(--ink-soft);margin:2px 4px 2px 0}
+svg text{font-family:var(--sans)}
+.foot{color:var(--ink-faint);font-size:13px;padding:30px 0 50px}
+@media (max-width:640px){section.step{padding:16px}.bar{grid-template-columns:100px 1fr 56px}}
+@media print{.topbar,.noprint,section.step:not(.printme){display:none!important}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="wrap">
+  <span class="brand">AI 예보관<small>통합과학2 · Ⅲ</small></span>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="l1">1차시 관측소</button>
+    <button class="tab" role="tab" data-tab="l2">2차시 속담 vs 빅데이터 vs AI</button>
+    <button class="tab" role="tab" data-tab="l3">3차시 채점·한계</button>
+  </nav>
+  <span class="spacer"></span>
+  <span class="who">
+    <select id="cls" aria-label="반"></select>
+    <select id="grp" aria-label="모둠"></select>
+  </span>
+  <button class="tbtn" id="themeBtn" type="button">테마</button>
+</div></div>
+
+<main class="wrap">
+<header class="mast">
+  <p class="eyebrow">[10통과2-03-02] · [10통과2-03-03] · [10통과2-03-04]</p>
+  <h1 id="title">속담 vs 빅데이터 vs AI — 누가 비를 맞힐까?</h1>
+  <p class="dek">과학 원리로 가설을 세우고, 기상청 10년 관측 빅데이터로 검증하고, AI 예보관을 학습시켜 사람이 만든 규칙과 겨룹니다. 마지막엔 우리 학교 무선 날씨센서의 오늘 값으로 실제 예보를 냅니다.</p>
+  <div class="row">
+    <span class="datachip"><span class="dot" id="dataDot"></span><span id="dataTxt">기상 빅데이터 불러오는 중…</span></span>
+    <label class="tbtn hidden" id="dataPick">자료 파일 직접 열기(CSV·ZIP 여러 개 가능) <input type="file" accept=".csv,.zip" id="dataFile" multiple class="hidden"></label>
+  </div>
+</header>
+
+<!-- =================== 1차시 =================== -->
+<div data-pane="l1" class="hidden">
+<section class="step">
+  <h2><span class="n">01</span>관측소 한 곳이 서울 전체를 대표할 수 있을까?</h2>
+  <p>기상청 서울 관측소(ASOS 108, 종로구 송월동)는 한 지점입니다. 우리 학교 여러 곳의 기온은 그 값과 얼마나 다를까요?</p>
+  <div class="grid3">
+    <div class="card"><h3>① 센서 연결</h3><p>크롬북 크롬에서 <b>sparkvue.pasco.com</b> 접속 → 센서 전원 켜기 → 블루투스 목록에서 센서 뒷면 ID 선택(설치 필요 없음).</p></div>
+    <div class="card"><h3>② 측정</h3><p>정해진 지점에 센서를 두고 <b>20분</b> 측정. 햇빛·그늘·바닥 재질을 메모해 둡니다.</p></div>
+    <div class="card"><h3>③ 내보내기</h3><p>SPARKvue 메뉴 → 데이터 내보내기 → <b>CSV</b>. 내려받은 파일을 아래에 올립니다.</p></div>
+  </div>
+</section>
+<section class="step">
+  <h2><span class="n">02</span>우리 모둠 측정 파일 올리기</h2>
+  <div class="row">
+    <label>측정 지점 <input type="text" id="obsPlace" placeholder="예: 운동장 양지(흙 바닥)" size="24"></label>
+    <input type="file" id="obsFile" accept=".csv">
+  </div>
+  <div id="obsRunRow" class="row hidden"><label>실행 번호 <select id="obsRun"></select></label>
+    <label id="obsStartWrap" class="hidden">측정 시작 시각 <input type="text" id="obsStart" placeholder="2026-10-27 14:20" size="16"></label></div>
+  <div id="obsOut"></div>
+  <div class="row"><button class="btn hidden" id="obsSend" type="button">반 관측망에 보내기</button><span id="obsMsg" class="note hidden"></span></div>
+</section>
+<section class="step">
+  <h2><span class="n">03</span>반 관측망 비교</h2>
+  <div class="row">
+    <button class="btn ghost" id="obsLoad" type="button">반 자료 불러오기</button>
+    <label>같은 시각 기상청 서울(ASOS) 기온 <input type="number" step="0.1" id="asosRef" style="width:90px"> °C</label>
+  </div>
+  <div id="obsCompare"></div>
+  <p class="note">토의: 지점마다 기온이 다른 까닭(햇빛, 바닥 재질, 바람, 건물)은? 관측소 한 곳의 값으로 예보하면 우리 학교에서는 어떤 오차가 생길까?</p>
+</section>
+<section class="step">
+  <h2><span class="n">04</span>날씨 속담 → 탐구 질문</h2>
+  <div class="grid3" id="provList1"></div>
+  <p>골라 온 속담을 <b>데이터로 확인할 수 있는 질문</b>으로 바꿔 쓰세요. (예: “3시간 동안 기압이 1 hPa 이상 내려가면, 이후 6시간 안에 비 올 확률이 평소보다 높을까?”)</p>
+  <textarea id="inq1" placeholder="우리 모둠의 탐구 질문"></textarea>
+</section>
+</div>
+
+<!-- =================== 2차시 =================== -->
+<div data-pane="l2">
+<section class="step">
+  <h2><span class="n">01</span>오늘의 대결<span class="min">5분</span></h2>
+  <p class="q" id="todayQ">오늘 저녁까지(앞으로 6시간) 비가 올까?</p>
+  <div class="grid3">
+    <div class="card"><h3>🧓 속담 예보관</h3><p>오랜 경험에서 나온 말. “무릎이 쑤시면 비가 온다.”</p></div>
+    <div class="card"><h3>📏 규칙 예보관</h3><p>우리가 과학 원리로 세운 <b>IF–THEN 규칙</b> 하나.</p></div>
+    <div class="card"><h3>🤖 AI 예보관</h3><p>10년 기록에서 <b>스스로 질문을 고르는</b> 의사결정트리.</p></div>
+  </div>
+  <p class="note" id="defNote"></p>
+</section>
+
+<section class="step">
+  <h2><span class="n">02</span>속담 → 과학 가설<span class="min">5분</span></h2>
+  <div class="grid3" id="provList"></div>
+  <div id="hypBox" class="hidden">
+    <p><b>과학 원리로 연결 고리를 써 보세요.</b> 속담 속 현상이 왜 비로 이어질까요?</p>
+    <textarea id="why" placeholder="예: 기압이 내려간다 → … → … → 비"></textarea>
+    <div class="row"><button class="tbtn" id="hintBtn" type="button">힌트 보기</button><span id="hint" class="note hidden"></span></div>
+    <div class="row" id="thRow"><label><span id="thLabel"></span> <input type="range" id="th"></label> <b id="thVal" class="num"></b></div>
+    <p class="hyp" id="hypText"></p>
+  </div>
+</section>
+
+<section class="step">
+  <h2><span class="n">03</span>10년 빅데이터로 검증<span class="min">7분</span></h2>
+  <p>기상청 서울 관측소의 <b>매시간</b> 기록 중 <b>학습 기간(<span class="pTrain">—</span>)</b>을 씁니다(시험 기간은 04에서 대결용으로 아껴 둠). “조건이 맞았던 시간”만 골라 그중 몇 %가 실제로 <b>이후 <span class="hH">6</span>시간 안에 비</b>였는지 셉니다.</p>
+  <button class="btn" id="testBtn" type="button" disabled>검증하기</button>
+  <div id="testOut"></div>
+</section>
+
+<section class="step">
+  <h2><span class="n">04</span>규칙 예보관 vs AI 예보관<span class="min">8분</span></h2>
+  <p><span class="pTrain">학습 기간</span> 자료로 만들고(학습), <b>한 번도 보지 않은 <span class="pTest">시험 기간</span></b>으로 시험합니다. 03의 가설 검증도 학습 기간 자료만 쓰므로 규칙 예보관도 시험 기간을 미리 보지 않았습니다.</p>
+  <div class="row"><b>📏 우리 규칙:</b> <span id="ruleText">—</span></div>
+  <div class="row"><label>조건 하나 더(그리고) <select id="rule2"><option value="">없음</option></select></label>
+    <span id="rule2th" class="hidden"><input type="range" id="th2"> <b id="th2Val" class="num"></b></span></div>
+  <div class="row"><button class="btn" id="trainBtn" type="button" disabled>AI 학습시키기</button>
+    <label>질문 개수(깊이) <select id="depth" onchange="document.getElementById('vsOut').innerHTML='';document.getElementById('trapOut').innerHTML=''"><option>2</option><option selected>3</option><option>4</option></select></label></div>
+  <div id="vsOut"></div>
+</section>
+
+<section class="step">
+  <h2><span class="n">05</span>정확도의 함정<span class="min">7분</span></h2>
+  <p>예보관이 하나 더 있습니다. <b>무조건 “비 안 옴”</b>이라고만 말하는 게으른 예보관. 정확도를 비교해 보세요.</p>
+  <button class="btn" id="trapBtn" type="button" disabled>게으른 예보관 넣기</button>
+  <div id="trapOut"></div>
+</section>
+
+<section class="step" id="secLive">
+  <h2><span class="n">06</span>우리 학교 센서로 실제 예보<span class="min">10분</span></h2>
+  <div class="row"><button class="btn ghost" id="liveBtn" type="button">실시간 센서값 불러오기</button><span id="liveMsg" class="tag"></span></div>
+  <div id="liveChart"></div>
+  <p class="note model">센서값과 관측소값은 측정 조건이 다릅니다(관측소: 잔디 위 백엽상 기온·습도, 10 m 높이 풍속). AI는 관측소 자료로 배웠으므로 센서는 실외 그늘에 두고, 차이가 크면 그 점을 예보 근거에 적습니다. “무릎이 기압을 느낀다”는 가정 자체는 이 수업에서 검증하지 않습니다. 기압은 날마다 두 번 오르내리므로(오후에 낮아짐) AI는 ‘관측 시각’도 함께 봅니다.</p>
+  <div class="grid2">
+    <div>
+      <table class="t" id="inTable">
+        <tr><th class="l">입력값</th><th>값</th></tr>
+        <tr><td class="l">3시간 기압 변화 (hPa)</td><td><input type="number" step="0.1" id="in_dp3" style="width:90px"></td></tr>
+        <tr><td class="l">상대 습도 (%)</td><td><input type="number" step="1" id="in_rh" style="width:90px"></td></tr>
+        <tr><td class="l">남풍 계열인가</td><td><select id="in_south"><option value="">선택</option><option value="0">아니요</option><option value="1">예</option></select></td></tr>
+        <tr><td class="l">기온 (°C)</td><td><input type="number" step="0.1" id="in_ta" style="width:90px"></td></tr>
+        <tr><td class="l">풍속 (m/s)</td><td><input type="number" step="0.1" id="in_ws" style="width:90px"></td></tr>
+        <tr><td class="l">관측 시각 (시)</td><td><input type="number" step="1" min="0" max="23" id="in_hour" style="width:90px"></td></tr>
+      </table>
+      <div class="row"><label>🧓 속담 예보(우리 판단) <select id="in_prov"><option value="">선택</option><option value="1">비</option><option value="0">비 안 옴</option></select></label></div>
+      <textarea id="in_reason" placeholder="속담 예보의 근거 — 몸과 하늘을 관찰한 것(예: 무릎·관절 느낌, 구름 모양, 바람 냄새). 센서 숫자는 쓰지 않습니다."></textarea>
+      <div class="row"><button class="btn" id="fcBtn" type="button" disabled>예보 카드 만들기</button></div>
+    </div>
+    <div id="fcCard"></div>
+  </div>
+</section>
+
+<section class="step">
+  <h2><span class="n">07</span>정리 — 출구 카드<span class="min">8분</span></h2>
+  <ol>
+    <li>오늘 탐구에서 드러난 <b>빅데이터 활용의 장점</b> 1가지와 그 근거</li>
+    <li>오늘 탐구에서 드러난 <b>빅데이터 활용의 문제점</b> 1가지와 그 근거 (힌트: 관측소 한 곳, 데이터 불균형, 과거 자료)</li>
+  </ol>
+  <p id="formLink" class="hidden"><a class="btn" target="_blank" rel="noopener" id="formA">출구 카드 제출(구글 설문)</a></p>
+</section>
+</div>
+
+<!-- =================== 3차시 =================== -->
+<div data-pane="l3" class="hidden">
+<section class="step">
+  <h2><span class="n">01</span>어제 예보 채점</h2>
+  <div class="row"><button class="btn ghost" id="scoreLoad" type="button">예보·실제 날씨 불러오기</button><label>날짜 <select id="scoreDate"></select></label></div>
+  <div id="scoreOut"></div>
+  <p class="note">하루 결과만으로 어느 예보관이 더 낫다고 말할 수 있을까? 몇 번을 채점해야 믿을 만할까?</p>
+</section>
+<section class="step">
+  <h2><span class="n">02</span>학습 기간과 시험 기간 나누기</h2>
+  <div class="row">
+    <label>학습 <select id="tr0"></select>–<select id="tr1"></select></label>
+    <label>시험 <select id="te0"></select>–<select id="te1"></select></label>
+    <label>시험 계절 <select id="season"><option value="all">전체</option><option value="spring">봄</option><option value="summer">여름</option><option value="autumn">가을</option><option value="winter">겨울</option></select></label>
+    <button class="btn" id="splitBtn" type="button" disabled>다시 학습·시험</button>
+  </div>
+  <div id="splitOut"></div>
+  <p class="note">예측: 과거 자료로만 배운 AI는 학습 기간에 거의 없던 조건(기후 변화, 드문 극한 호우)에서 어떻게 될까? 위 결과가 그 예측을 지지하는지, 지지하지 않는다면 왜인지 써 보세요.</p>
+</section>
+<section class="step">
+  <h2><span class="n">03</span>실제 AI 기상예보 사례</h2>
+  <div class="grid2">
+    <div class="card"><h3>GraphCast (Google DeepMind, 2023)</h3><p>과거 수십 년의 재분석 자료로 학습한 AI 전지구 예보 모델. 논문은 <i>Science</i>(2023)에 실림. <a href="https://deepmind.google/blog/graphcast-ai-model-for-faster-and-more-accurate-global-weather-forecasting/" target="_blank" rel="noopener">소개 글</a></p></div>
+    <div class="card"><h3>기상청 AI 기상·기후 파운데이션 모델</h3><p>2026년 업무 계획에서 초단기~3개월 전망을 아우르는 AI 모델 설계를 추진. <a href="https://www.heraldk.com/article/2025121719450057614" target="_blank" rel="noopener">관련 기사</a></p></div>
+  </div>
+  <p class="note">조사 활동: 각 사례의 유용성(속도·비용)과 한계(극한기상, 판단 근거 설명)를 근거와 함께 정리합니다.</p>
+</section>
+</div>
+
+<p class="foot">자료: 기상청 기상자료개방포털 종관기상관측(ASOS) 서울(108) 시간자료 · 우리 학교 PASCO 무선 날씨센서(PS-3209). 판정 기준(배수 1.5·1.1·0.9)은 수업용 기준이며 통계적 검정이 아닙니다. · AI 예보관 <span id="ver"></span> · 교사가 바이브코딩으로 제작</p>
+</main>
+
+<script src="core.js"></script>
+<script>
+(function(){
+'use strict';
+var C = window.Core;
+var $ = function(id){ return document.getElementById(id); };
+var qs = new URLSearchParams(location.search);
+var LS = { get:function(k,d){ try{ var v=localStorage.getItem('aif_'+k); return v===null?d:v; }catch(e){ return d; } },
+           set:function(k,v){ try{ localStorage.setItem('aif_'+k,v); }catch(e){} } };
+var esc = function(s){ return String(s===undefined||s===null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); };
+var pct = function(x,d){ return isNaN(x)?'—':(x*100).toFixed(d===undefined?1:d)+'%'; };
+var fmt = function(x,d){ return isNaN(x)?'—':Number(x).toFixed(d===undefined?1:d); };
+$('ver').textContent = 'v'+C.VERSION;
+
+/* ---------- 설정 ---------- */
+if (qs.get('gas')) LS.set('gas', qs.get('gas'));
+if (qs.get('form')) LS.set('form', qs.get('form'));
+var GAS = LS.get('gas','');
+var H = [6,12,24].indexOf(+qs.get('h'))>=0 ? +qs.get('h') : 6;
+var TRAIN = [2016,2022], TEST = [2023,2025];
+document.querySelectorAll('.hH').forEach(function(e){ e.textContent = H; });
+$('todayQ').textContent = H===6 ? '오늘 저녁까지(앞으로 6시간) 비가 올까?' : '앞으로 '+H+'시간 안에 비가 올까?';
+$('defNote').innerHTML = '<b>“비”의 뜻</b>: 앞으로 '+H+'시간 동안 서울 관측소에 강수량 0.1 mm 이상이 기록됨(눈 포함). 그렇지 않으면 <b>“비 안 옴”</b>(흐림 포함). 세 예보관 모두 같은 기준으로 채점합니다.';
+if (LS.get('form','')) { $('formLink').classList.remove('hidden'); $('formA').href = LS.get('form',''); }
+
+/* ---------- 테마 ---------- */
+var th0 = LS.get('theme',''); if (th0) document.documentElement.setAttribute('data-theme', th0);
+$('themeBtn').onclick = function(){ var cur=document.documentElement.getAttribute('data-theme');
+  var dark = cur ? cur==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  var nx = dark?'light':'dark'; document.documentElement.setAttribute('data-theme',nx); LS.set('theme',nx); };
+
+/* ---------- 반·모둠 ---------- */
+for (var i=1;i<=12;i++) $('cls').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'반</option>');
+for (i=1;i<=6;i++) $('grp').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'모둠</option>');
+$('cls').value = LS.get('cls','2'); $('grp').value = LS.get('grp','1');
+$('cls').onchange = function(){ LS.set('cls',this.value); }; $('grp').onchange = function(){ LS.set('grp',this.value); };
+
+/* ---------- 탭 ---------- */
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(function(b){ b.setAttribute('aria-selected', b.dataset.tab===t); });
+  document.querySelectorAll('[data-pane]').forEach(function(p){ p.classList.toggle('hidden', p.dataset.pane!==t); });
+  LS.set('tab',t);
+  var T={l1:['1차시','우리 학교 기상관측소 세우기'],l2:['2차시','속담 vs 빅데이터 vs AI — 누가 비를 맞힐까?'],l3:['3차시','예보 채점과 AI의 한계']}[t];
+  if (T){ $('title').textContent=T[1]; document.title='AI 예보관 · '+T[0]+' '+T[1]; }
+}
+document.querySelectorAll('.tab').forEach(function(b){ b.onclick = function(){ showTab(b.dataset.tab); }; });
+showTab(qs.get('tab') || LS.get('tab','l2'));
+
+/* ---------- 통신 ---------- */
+function jsonp(params, cb){
+  if (!GAS) { cb({ok:false,error:'선생님이 실시간 주소(Apps Script)를 아직 연결하지 않았습니다'}); return; }
+  var name = 'cb'+Date.now()+Math.floor(Math.random()*1000), s = document.createElement('script'), done=false;
+  window[name] = function(d){ if(done) return; done=true; cb(d); delete window[name]; s.remove(); };
+  s.src = GAS + (GAS.indexOf('?')<0?'?':'&') + new URLSearchParams(params).toString() + '&callback='+name;
+  s.onerror = function(){ if(!done){ done=true; cb({ok:false,error:'연결 실패'}); } };
+  setTimeout(function(){ if(!done){ done=true; cb({ok:false,error:'응답 시간 초과'}); } }, 15000);
+  document.body.appendChild(s);
+}
+function post(body){
+  if (!GAS) return Promise.reject(new Error('Apps Script 주소가 없습니다'));
+  return fetch(GAS,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+}
+
+/* ---------- 그림: 막대(값 하나 → 길이·글자 같은 숫자에서) ---------- */
+function bars(items, max){
+  max = max || Math.max.apply(null, items.map(function(x){ return x.v; }).filter(function(v){return !isNaN(v);}).concat([1e-9]));
+  return '<div class="bars">'+items.map(function(x){
+    var w = isNaN(x.v)?0:Math.max(0,Math.min(100, x.v/max*100));
+    return '<div class="bar"><span>'+x.label+'</span><span class="track"><span class="fill" style="display:block;width:'+w.toFixed(1)+'%;background:'+(x.color||'var(--s1)')+'"></span></span><span class="v">'+(x.text||fmt(x.v))+'</span></div>';
+  }).join('')+'</div>';
+}
+
+/* ---------- 그림: 시계열(좌표 함수 X·Y 하나로) ---------- */
+function lineChart(pts, opt){
+  // pts: [{ms, y}] · 축과 점과 선이 모두 X(), Y() 를 거친다
+  pts = pts.filter(function(p){ return !isNaN(p.ms) && !isNaN(p.y); });
+  if (pts.length < 2) return '<p class="note">그래프를 그릴 점이 부족합니다.</p>';
+  var W=640,Hh=220,L=56,R=14,T=16,B=34;
+  var x0=pts[0].ms, x1=pts[pts.length-1].ms;
+  var ys=pts.map(function(p){return p.y;}), y0=Math.min.apply(null,ys), y1=Math.max.apply(null,ys);
+  var pad=Math.max((y1-y0)*0.15, opt.minSpan||0.5); y0-=pad; y1+=pad;
+  var X=function(ms){ return L+(ms-x0)/(x1-x0||1)*(W-L-R); };
+  var Y=function(v){ return T+(1-(v-y0)/(y1-y0))*(Hh-T-B); };
+  var g='';
+  for (var k=0;k<=4;k++){ var v=y0+(y1-y0)*k/4; g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="var(--chart-grid)"/><text x="'+(L-6)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="11" fill="var(--ink-faint)">'+v.toFixed(opt.dec||1)+'</text>'; }
+  [x0,(x0+x1)/2,x1].forEach(function(ms,i){ g+='<text x="'+X(ms).toFixed(1)+'" y="'+(Hh-10)+'" text-anchor="'+['start','middle','end'][i]+'" font-size="11" fill="var(--ink-faint)">'+C.fmtTime(ms).slice(11,16)+'</text>'; });
+  var d=pts.map(function(p,i){ return (i?'L':'M')+X(p.ms).toFixed(1)+' '+Y(p.y).toFixed(1); }).join(' ');
+  var marks=(opt.marks||[]).filter(function(m){return !isNaN(m.ms)&&!isNaN(m.y);}).map(function(m){
+    return '<circle cx="'+X(m.ms).toFixed(1)+'" cy="'+Y(m.y).toFixed(1)+'" r="5" fill="var(--s2)"/><text x="'+(X(m.ms)+(m.anchor==='end'?-8:8)).toFixed(1)+'" y="'+(Y(m.y)-8).toFixed(1)+'" text-anchor="'+(m.anchor||'start')+'" font-size="12" fill="var(--s2-ink)" font-weight="700">'+esc(m.label)+'</text>'; }).join('');
+  return '<svg viewBox="0 0 '+W+' '+Hh+'" width="100%" role="img" aria-label="'+esc(opt.title)+'"><text x="'+L+'" y="11" font-size="12" fill="var(--ink-soft)">'+esc(opt.title)+'</text>'+g+'<path d="'+d+'" fill="none" stroke="var(--s1)" stroke-width="2.2"/>'+marks+'</svg>';
+}
+
+/* ================= 기상 빅데이터 ================= */
+var RAW=null, FEAT=null;
+function setData(rows, label){
+  RAW = rows; FEAT = C.buildFeatures(rows, H);
+  var ys = FEAT.rows.map(function(r){return r.year;});
+  var yMin = Math.min.apply(null,ys), yMax = Math.max.apply(null,ys);
+  if (yMax - yMin >= 3) { TEST=[yMax-2,yMax]; TRAIN=[yMin,yMax-3]; } else { TRAIN=[yMin,yMax]; TEST=[yMin,yMax]; }
+  var rainShare = FEAT.rows.filter(function(r){return r.rain;}).length / FEAT.rows.length;
+  $('dataDot').className='dot ok';
+  $('dataTxt').innerHTML = '<b>'+esc(label)+'</b> · '+yMin+'–'+yMax+' · '+FEAT.rows.length.toLocaleString()+'시간 · 앞으로 '+H+'시간 안 비 기준';
+  ['testBtn','trainBtn','trapBtn','splitBtn','fcBtn'].forEach(function(id){ $(id).disabled=false; });
+  fillYears(yMin,yMax);
+  document.querySelectorAll('.pTrain').forEach(function(e){ e.textContent=TRAIN[0]+'–'+TRAIN[1]+'년'; });
+  document.querySelectorAll('.pTest').forEach(function(e){ e.textContent=TEST[0]+'–'+TEST[1]+'년'; });
+  FEAT.rainShare = rainShare;
+}
+function loadData(){
+  fetch('data/asos_108_hourly.csv',{cache:'no-cache'}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.text(); })
+    .then(function(t){ setData(C.parseSlim(t), '기상청 ASOS 서울(108)'); })
+    .catch(function(){
+      // 커밋 전: 교사용 페이지에서 “이 브라우저에서 바로 써 보기”로 저장한 자료
+      C.idbGet('asos').then(function(t){ if(!t) throw new Error('none'); setData(C.parseSlim(t), '기상청 ASOS 서울(108) · 이 브라우저 임시 저장본'); })
+        .catch(function(){
+          $('dataDot').className='dot warn';
+          $('dataTxt').textContent='기상 빅데이터 파일(data/asos_108_hourly.csv)이 아직 없습니다 — 선생님께 알려 주세요';
+          $('dataPick').classList.remove('hidden');
+        });
+    });
+}
+$('dataFile').onchange = function(){
+  var files=[].slice.call(this.files); if(!files.length) return;
+  Promise.all(files.map(function(f){ return f.arrayBuffer().then(function(b){
+    if(/\.zip$/i.test(f.name)) return C.readZip(b).then(function(es){ return es.map(function(e){ return C.parseAnyWeather(C.decodeKorean(new Uint8Array(e.bytes))).rows; }); });
+    return [C.parseAnyWeather(C.decodeKorean(new Uint8Array(b))).rows];
+  }); })).then(function(g){ setData(C.mergeRows([].concat.apply([],g)), files.length===1?files[0].name:files.length+'개 파일'); })
+    .catch(function(e){ alert(e.message); });
+};
+loadData();
+
+/* ================= 2차시 ================= */
+var HYP = LS.get('hyp',''), TH = {}, MODEL=null, MODELW=null;
+Object.keys(C.HYPS).forEach(function(k){ TH[k] = +LS.get('th_'+k, C.HYPS[k].def); });
+
+function provCards(el, selectable){
+  el.innerHTML = Object.keys(C.HYPS).map(function(k){
+    var h=C.HYPS[k];
+    return '<button type="button" class="card pick" data-k="'+k+'" aria-pressed="'+(HYP===k)+'"'+(selectable?'':' tabindex="-1"')+'><h3>“'+esc(h.proverb)+'”</h3><p>확인할 변수: '+esc(C.featByKey(h.feature).name)+'</p></button>';
+  }).join('');
+  if (selectable) el.querySelectorAll('.pick').forEach(function(b){ b.onclick=function(){ chooseHyp(b.dataset.k); }; });
+}
+provCards($('provList'), true); provCards($('provList1'), false);
+
+function curCond(k){ var h=C.HYPS[k]; return {feature:h.feature, op:h.op, th:TH[k]}; }
+function chooseHyp(k){
+  HYP=k; LS.set('hyp',k);
+  document.querySelectorAll('#provList .pick').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.k===k); });
+  var h=C.HYPS[k];
+  $('hypBox').classList.remove('hidden');
+  $('why').value = LS.get('why_'+k,'');
+  $('hint').textContent = h.science; $('hint').classList.add('hidden');
+  var r=$('th'); r.min=h.min; r.max=h.max; r.step=h.step; r.value=TH[k];
+  $('thRow').classList.toggle('hidden', k==='south');
+  $('thLabel').textContent = k==='pressure' ? '기압 변화 기준' : '습도 기준';
+  // 두 번째 조건 목록
+  $('rule2').innerHTML='<option value="">없음</option>'+Object.keys(C.HYPS).filter(function(x){return x!==k;}).map(function(x){ return '<option value="'+x+'">'+esc(C.HYPS[x].text(TH[x]))+'</option>'; }).join('');
+  $('rule2th').classList.add('hidden');
+  updateHyp(); staleResults();
+}
+function staleResults(){
+  ['testOut','vsOut','trapOut','fcCard'].forEach(function(id){ $(id).innerHTML=''; });
+  MODEL=null; MODELW=null;
+}
+function updateHyp(){
+  if (!HYP) return;
+  var h=C.HYPS[HYP];
+  $('thVal').textContent = HYP==='south' ? '' : (TH[HYP]+' '+h.unit);
+  $('hypText').innerHTML = '가설: 만약 <em>'+esc(h.text(TH[HYP]))+'</em>면, 앞으로 '+H+'시간 안에 비가 올 확률이 <em>평소보다 높을 것이다</em>.';
+  $('ruleText').textContent = ruleConds().map(function(c){ return C.HYPS[c.k].text(c.th); }).join(' 그리고 ') + ' → “비”, 아니면 “비 안 옴”';
+}
+$('th').oninput = function(){ TH[HYP]=+this.value; LS.set('th_'+HYP,this.value); updateHyp(); staleResults(); };
+$('why').oninput = function(){ LS.set('why_'+HYP,this.value); };
+$('hintBtn').onclick = function(){ $('hint').classList.toggle('hidden'); };
+$('rule2').onchange = function(){
+  var k=this.value; $('rule2th').classList.toggle('hidden', !k || k==='south');
+  if (k && k!=='south'){ var h=C.HYPS[k], r=$('th2'); r.min=h.min; r.max=h.max; r.step=h.step; r.value=TH[k]; $('th2Val').textContent=TH[k]+' '+h.unit; }
+  updateHyp(); staleResults();
+};
+$('th2').oninput = function(){ var k=$('rule2').value; TH[k]=+this.value; $('th2Val').textContent=TH[k]+' '+C.HYPS[k].unit;
+  var o=$('rule2').querySelector('option[value="'+k+'"]'); if(o) o.textContent=C.HYPS[k].text(TH[k]); updateHyp(); staleResults(); };
+function ruleConds(){
+  var out=[]; if (HYP) out.push({k:HYP, th:TH[HYP]});
+  var k2=$('rule2').value; if (k2) out.push({k:k2, th:TH[k2]});
+  return out;
+}
+function rulePredict(){ return C.ruleFn(ruleConds().map(function(c){ var h=C.HYPS[c.k]; return {feature:h.feature, op:h.op, th:c.th}; })); }
+if (HYP) chooseHyp(HYP);
+
+/* 03 검증 */
+$('testBtn').onclick = function(){
+  if (!HYP){ alert('02에서 속담을 먼저 고르세요'); return; }
+  var ct = C.crossTab(trainTest().tr, C.condFn(curCond(HYP))), v = C.verdict(ct);
+  var R=C.VERDICT_RULE;
+  $('testOut').innerHTML =
+    '<table class="t num"><tr><th class="l">'+TRAIN[0]+'–'+TRAIN[1]+' 매시간 기록</th><th>이후 '+H+'시간 안 비</th><th>비 안 옴</th><th>합계</th><th>비 올 확률</th></tr>'+
+    '<tr><td class="l">조건 맞음 ('+esc(C.HYPS[HYP].text(TH[HYP]))+')</td><td>'+ct.a.toLocaleString()+'</td><td>'+ct.b.toLocaleString()+'</td><td>'+ct.nCond.toLocaleString()+'</td><td><b>'+pct(ct.pCond)+'</b></td></tr>'+
+    '<tr><td class="l">조건 안 맞음</td><td>'+ct.c.toLocaleString()+'</td><td>'+ct.d.toLocaleString()+'</td><td>'+(ct.c+ct.d).toLocaleString()+'</td><td>'+pct(ct.pNot)+'</td></tr>'+
+    '<tr><td class="l">전체(평소)</td><td>'+(ct.a+ct.c).toLocaleString()+'</td><td>'+(ct.b+ct.d).toLocaleString()+'</td><td>'+ct.n.toLocaleString()+'</td><td>'+pct(ct.pBase)+'</td></tr></table>'+
+    bars([{label:'조건 맞을 때',v:ct.pCond*100,text:pct(ct.pCond),color:'var(--s2)'},{label:'평소(전체)',v:ct.pBase*100,text:pct(ct.pBase),color:'var(--s3)'}],100)+
+    '<p class="big">'+(isNaN(ct.ratio)?'—':ct.ratio.toFixed(2)+'배')+'</p><p>조건이 맞을 때 비 올 확률은 평소의 '+(isNaN(ct.ratio)?'—':ct.ratio.toFixed(2)+'배')+'입니다.</p>'+
+    '<span class="verdict '+v.tone+'">'+esc(v.label)+'</span>'+
+    '<p class="note">수업용 판정 기준: 평소의 '+R.strong+'배 이상 “지지”, '+R.weak+'배 이상~'+R.strong+'배 미만 “약하게 지지”, '+R.none+'배 이상~'+R.weak+'배 미만 “기각(차이 없음)”, '+R.none+'배 미만 “기각(반대)”, 조건에 맞는 시간이 '+R.minN+'개 미만이면 “판단 보류”. 통계적 검정은 아닙니다. 기준값을 바꾸거나(남풍 모둠은 04의 “조건 하나 더”를 붙여) 결과가 어떻게 달라지는지 확인해 보세요.</p>'+(HYP==='pressure'?'<p class="note model">주의: 기압은 날마다 두 번 오르내립니다(오전 10시 무렵 높고 오후 4시 무렵 낮음). 그래서 맑은 날 오후에도 3시간에 1 hPa 안팎 내려갈 수 있습니다. 이 변화가 결과에 어떤 영향을 줄까요?</p>':'');
+};
+
+/* 04 규칙 vs AI */
+function treeHTML(node){
+  if (!node.split) return '<span class="leaf '+(node.pred?'rain':'dry')+'">'+(node.pred?'비':'비 안 옴')+'</span><span class="meta">과거 '+node.n.toLocaleString()+'시간 중 비 '+pct(node.pRain,0)+'</span>';
+  return '<span class="qn">'+esc(C.questionText(node.split))+'</span><ul><li><span class="yn">예 →</span> '+treeHTML(node.split.yes)+'</li><li><span class="yn">아니요 →</span> '+treeHTML(node.split.no)+'</li></ul>';
+}
+function scoreTable(list, full){
+  var head = full ? '<tr><th class="l">예보관</th><th>정확도</th><th>비 맞힘</th><th>비 놓침</th><th>헛경보</th><th>비 온 시간 중 맞힌 비율</th></tr>'
+                  : '<tr><th class="l">예보관</th><th>정확도(맞힌 시간 ÷ 전체 시간)</th></tr>';
+  return '<table class="t num">'+head+list.map(function(x){ var m=x.m;
+    return full ? '<tr><td class="l">'+x.name+'</td><td>'+pct(m.acc)+'</td><td>'+m.tp.toLocaleString()+'</td><td><b>'+m.fn.toLocaleString()+'</b></td><td>'+m.fp.toLocaleString()+'</td><td><b>'+pct(m.recall)+'</b></td></tr>'
+                : '<tr><td class="l">'+x.name+'</td><td><b>'+pct(m.acc)+'</b></td></tr>'; }).join('')+'</table>';
+}
+function trainTest(){ return { tr:C.filterRows(FEAT.rows,TRAIN[0],TRAIN[1]), te:C.filterRows(FEAT.rows,TEST[0],TEST[1]) }; }
+$('trainBtn').onclick = function(){
+  if (!HYP){ alert('02에서 속담을 먼저 고르세요'); return; }
+  var s=trainTest();
+  MODEL = C.trainTree(s.tr,{maxDepth:+$('depth').value}); MODELW=null;
+  var mr=C.evaluate(s.te, rulePredict()), ma=C.evaluate(s.te, C.predictTree(MODEL));
+  $('vsOut').innerHTML =
+    '<div class="grid2"><div><h3>🤖 AI 예보관이 만든 질문 나무</h3><div class="tree"><ul><li>'+treeHTML(MODEL.root)+'</li></ul></div></div>'+
+    '<div><h3>AI가 중요하게 본 변수</h3>'+bars(MODEL.importance.map(function(x){ return {label:x.name, v:x.value*100, text:pct(x.value,0)}; }),100)+
+    '<p class="note">AI가 <b>가장 먼저</b> 물어본 질문은 무엇인가요? 그 변수가 왜 비와 관련 있을지 <b>과학 원리</b>로 설명해 보세요.</p></div></div>'+
+    '<h3>시험 결과 ('+TEST[0]+'–'+TEST[1]+', '+s.te.length.toLocaleString()+'시간)</h3>'+
+    scoreTable([{name:'📏 우리 규칙',m:mr},{name:'🤖 AI',m:ma}], false)+
+    bars([{label:'📏 우리 규칙',v:mr.acc*100,text:pct(mr.acc),color:'var(--s2)'},{label:'🤖 AI',v:ma.acc*100,text:pct(ma.acc),color:'var(--s1)'}],100);
+  $('trapOut').innerHTML='';
+};
+
+/* 05 정확도의 함정 */
+$('trapBtn').onclick = function(){
+  if (!MODEL){ alert('04에서 AI를 먼저 학습시키세요'); return; }
+  var s=trainTest();
+  var md=C.evaluate(s.te,function(){return 0;}), mr=C.evaluate(s.te,rulePredict()), ma=C.evaluate(s.te,C.predictTree(MODEL));
+  var nRain=s.tr.filter(function(r){return r.rain;}).length, k=(s.tr.length-nRain)/nRain;
+  var html = scoreTable([{name:'😴 무조건 ‘비 안 옴’',m:md},{name:'📏 우리 규칙',m:mr},{name:'🤖 AI',m:ma}], false)+
+    '<p class="note">시험 기간 '+s.te.length.toLocaleString()+'시각 중 <b>이후 '+H+'시간 안에 비가 온 시각</b>은 '+(md.fn).toLocaleString()+'개(<b>'+pct(md.fn/md.n)+'</b>)뿐입니다. 그래서 “무조건 비 안 옴”만 외쳐도 정확도가 '+pct(md.acc)+'입니다.</p>'+
+    '<button class="btn" id="trapReveal" type="button">비 온 시간만 따로 보기</button><div id="trapMore"></div>';
+  $('trapOut').innerHTML = html;
+  $('trapReveal').onclick = function(){
+    $('trapMore').innerHTML = scoreTable([{name:'😴 무조건 ‘비 안 옴’',m:md},{name:'📏 우리 규칙',m:mr},{name:'🤖 AI',m:ma}], true)+
+      bars([{label:'😴 무조건 ‘비 안 옴’',v:md.recall*100,text:pct(md.recall),color:'var(--s3)'},{label:'📏 우리 규칙',v:mr.recall*100,text:pct(mr.recall),color:'var(--s2)'},{label:'🤖 AI',v:ma.recall*100,text:pct(ma.recall),color:'var(--s1)'}],100)+
+      '<p class="note">막대 = <b>비 온 시간 중 맞힌 비율</b>(재현율). 정확도만 보면 놓치는 것이 무엇인가요?</p>'+
+      '<div class="row"><button class="btn ghost" id="wBtn" type="button">AI에게 “비를 놓치면 벌점 '+k.toFixed(1)+'배”로 다시 가르치기</button></div><div id="wOut"></div>';
+    $('wBtn').onclick = function(){
+      MODELW = C.trainTree(s.tr,{maxDepth:MODEL.opts.maxDepth, weightRain:k});
+      var mw=C.evaluate(s.te,C.predictTree(MODELW));
+      $('wOut').innerHTML = scoreTable([{name:'🤖 AI(처음)',m:ma},{name:'🤖 AI(비 놓침 벌점 '+k.toFixed(1)+'배)',m:mw}], true)+
+        '<p class="note">벌점 '+k.toFixed(1)+'배 = 학습 자료에서 “비 안 옴” 시간 수 ÷ “비” 시간 수. 정확도와 비 맞힘률은 어떻게 바뀌었나요? 헛경보는? 재난 대비에는 어느 AI가 나을까요?</p>';
+    };
+  };
+};
+
+/* 06 실시간 + 예보 카드 */
+function setIn(v){ ['dp3','rh','ta','ws'].forEach(function(k){ $('in_'+k).value = isNaN(v[k]) ? '' : Math.round(v[k]*10)/10; }); $('in_south').value = (v.south===0||v.south===1) ? String(v.south) : ''; $('in_hour').value = new Date(v.atMs+9*3600e3).getUTCHours(); }
+$('liveBtn').onclick = function(){
+  $('liveMsg').textContent='불러오는 중…';
+  jsonp({action:'latest'}, function(d){
+    if (!d.ok || !d.latest){ $('liveMsg').textContent = d.error || '아직 센서 기록이 없습니다 — 값을 직접 입력하세요'; return; }
+    var li = C.liveInputs(d.series);
+    var pts = d.series.map(function(s){ return {ms:C.parseKST(s.ts), y:C.num(s.p)}; });
+    var marks=[]; if (li && !isNaN(li.p3)) marks.push({ms:C.parseKST(li.p3at), y:li.p3, label:'3시간 전'});
+    if (li) marks.push({ms:C.parseKST(li.at), y:li.p, label:'지금', anchor:'end'});
+    $('liveChart').innerHTML = lineChart(pts,{title:'우리 학교 현지기압 (hPa) · 최근 6시간 · 무선 날씨센서 실측',dec:1,minSpan:0.6,marks:marks});
+    var age = li ? (Date.now()-li.atMs)/60000 : NaN;
+    $('liveMsg').textContent = '마지막 기록 '+(li?li.at:'')+(age>10?' ⚠ '+Math.round(age)+'분 전 기록 — 브리지 상태를 확인하세요':'')+(li&&isNaN(li.p)?' · 지금 기압 기록이 없음':(li&&isNaN(li.dp3)?' · 3시간 전 기록이 없어 기압 변화는 직접 입력':''))+(li?' · 풍향 '+li.dir:'');
+    if (li) setIn(li);
+  });
+};
+$('fcBtn').onclick = function(){
+  if (!MODEL){ alert('04에서 AI를 먼저 학습시키세요'); return; }
+  if (!HYP){ alert('02에서 속담을 먼저 고르세요'); return; }
+  if ($('in_south').value===''){ alert('남풍 계열인지 고르세요(풍향을 모르면 바람이 불어오는 쪽을 관찰해 고릅니다)'); return; }
+  if ($('in_hour').value==='') $('in_hour').value = new Date(Date.now()+9*3600e3).getUTCHours();
+  var r = { dp3:+$('in_dp3').value, rh:+$('in_rh').value, south:+$('in_south').value, ta:+$('in_ta').value, ws:+$('in_ws').value, hour:+$('in_hour').value };
+  if (['in_dp3','in_rh','in_ta','in_ws'].some(function(id){ return $(id).value.trim()==='' || isNaN(+$(id).value); })){ alert('기압 변화·습도·기온·풍속을 모두 입력하세요'); return; }
+  var prov=$('in_prov').value; if(!prov){ alert('속담 예보(우리 판단)를 고르세요'); return; }
+  var rule=rulePredict()(r), leaf=C.leafOf(MODEL,r), ai=leaf.pred;
+  var w = function(y){ return +y ? '비' : '비 안 옴'; };
+  var nowS = C.fmtTime(Date.now()), today = nowS.slice(0,10);
+  var card = { date:today, issued:nowS.slice(11,16), H:H, cls:$('cls').value, group:$('grp').value, hyp:HYP, ruleText:$('ruleText').textContent,
+    proverb:w(prov), rule:w(rule), ai:w(ai), dp3:r.dp3, rh:r.rh, south:r.south, ta:r.ta, ws:r.ws, hour:r.hour, reason:$('in_reason').value };
+  $('fcCard').innerHTML = '<div class="fc"><h3>'+card.cls+'반 '+card.group+'모둠 예보 카드</h3><p class="tag">'+today+' '+card.issued+' 예보 · 앞으로 '+H+'시간 안</p>'+
+    '<div class="three"><div>🧓 속담<b>'+card.proverb+'</b></div><div>📏 규칙<b>'+card.rule+'</b></div><div>🤖 AI<b>'+card.ai+'</b></div></div>'+
+    '<p style="font-size:14px">입력: 기압 변화 '+fmt(r.dp3)+' hPa · 습도 '+fmt(r.rh,0)+'% · '+(r.south?'남풍 계열':'남풍 아님')+' · 기온 '+fmt(r.ta)+' °C · 풍속 '+fmt(r.ws)+' m/s · '+r.hour+'시</p>'+
+    '<p style="font-size:14px">🤖 AI 근거: 지금과 비슷한 과거 '+leaf.n.toLocaleString()+'시간 중 '+pct(leaf.pRain,0)+'가 이후 '+H+'시간 안에 비였음</p>'+
+    '<p style="font-size:14px">🧓 근거: '+esc(card.reason||'—')+'</p>'+
+    '<div class="row noprint"><button class="btn" id="fcSend" type="button">선생님께 보내기</button><button class="btn ghost" type="button" onclick="window.print()">인쇄</button><span id="fcMsg" class="tag"></span></div></div>';
+  $('fcSend').onclick = function(){
+    post(Object.assign({kind:'forecast'}, card)).then(function(){ $('fcMsg').textContent='전송 요청함 — 3차시 채점 화면에서 우리 모둠 카드가 보이면 저장된 것'; }).catch(function(e){ $('fcMsg').textContent='보내지 못함: '+e.message+' — 화면을 사진으로 찍어 클래스룸에 올리세요'; });
+  };
+  $('secLive').classList.add('printme');
+};
+
+/* ================= 1차시 ================= */
+var OBS=null;
+$('obsFile').onchange = function(){
+  var f=this.files[0]; if(!f) return;
+  f.text().then(function(t){
+    try{ OBS = C.parseSparkvue(t); }catch(e){ $('obsOut').innerHTML='<p class="note">'+esc(e.message)+'</p>'; return; }
+    var runs=Object.keys(OBS);
+    $('obsRun').innerHTML = runs.map(function(r){ return '<option value="'+r+'">실행 '+r+'</option>'; }).join('');
+    $('obsRun').value = runs[runs.length-1];
+    $('obsRunRow').classList.remove('hidden');
+    renderObs();
+  });
+};
+$('obsRun').onchange = renderObs; $('obsStart').onchange = renderObs;
+var OBSMIN=null;
+function renderObs(){
+  var run=OBS[$('obsRun').value];
+  $('obsStartWrap').classList.toggle('hidden', run.hasClock);
+  var start = run.hasClock ? NaN : C.parseKST($('obsStart').value);
+  if (!run.hasClock && isNaN(start)){ $('obsOut').innerHTML='<p class="note">이 파일에는 시각(일시) 열이 없습니다. 측정 시작 시각을 입력하세요.</p>'; return; }
+  OBSMIN = C.resampleMinute(run.rows, start);
+  var ta = OBSMIN.map(function(o){return o.ta;}).filter(function(v){return !isNaN(v);});
+  var st = ta.length ? {mean:ta.reduce(function(a,b){return a+b;},0)/ta.length, min:Math.min.apply(null,ta), max:Math.max.apply(null,ta)} : null;
+  var p = OBSMIN.map(function(o){return o.p;}).filter(function(v){return !isNaN(v);});
+  $('obsOut').innerHTML = lineChart(OBSMIN.map(function(o){return {ms:o.ms,y:o.ta};}),{title:'우리 모둠 기온 (°C) · 1분 평균',dec:1,minSpan:0.3})+
+    '<p>원자료 '+run.rows.length+'점 → 1분 평균 '+OBSMIN.length+'점 · '+(st?'평균 <b>'+st.mean.toFixed(1)+' °C</b> (최저 '+st.min.toFixed(1)+', 최고 '+st.max.toFixed(1)+')':'기온 없음')+
+    (p.length?' · 기압 '+p[p.length-1].toFixed(1)+' hPa'+(run.cols.p&&run.cols.p.unit&&!/hpa|mbar/i.test(run.cols.p.unit)?' ('+esc(run.cols.p.unit)+' → hPa 환산)':''):'')+'</p>';
+  $('obsSend').classList.remove('hidden');
+}
+$('obsSend').onclick = function(){
+  if (!$('obsPlace').value.trim()){ alert('측정 지점을 적어 주세요'); return; }
+  post({kind:'obs', group:$('cls').value+'반-'+$('grp').value+'모둠', place:$('obsPlace').value.trim(),
+        rows:OBSMIN.map(function(o){ return {ts:o.ts, ta:o.ta, rh:o.rh, p:o.p}; })})
+    .then(function(){ $('obsMsg').textContent='전송 요청함 — 03에서 반 자료를 불러와 우리 모둠이 보이면 저장된 것'; $('obsMsg').classList.remove('hidden'); })
+    .catch(function(e){ $('obsMsg').textContent='보내지 못함: '+e.message; $('obsMsg').classList.remove('hidden'); });
+};
+$('obsLoad').onclick = function(){
+  jsonp({action:'obs'}, function(d){
+    if(!d.ok){ $('obsCompare').innerHTML='<p class="note">'+esc(d.error)+'</p>'; return; }
+    var cls=$('cls').value+'반-', g={};
+    d.rows.filter(function(r){ return String(r.group).indexOf(cls)===0; }).forEach(function(r){
+      var k=r.group+' · '+r.place; (g[k]=g[k]||[]).push(Number(r.ta)); });
+    var items=Object.keys(g).sort().map(function(k){ var a=g[k].filter(function(v){return !isNaN(v);}); return {label:k, v:a.length?a.reduce(function(s,v){return s+v;},0)/a.length:NaN}; })
+      .filter(function(x){ return !isNaN(x.v); });
+    if(!items.length){ $('obsCompare').innerHTML='<p class="note">우리 반 자료가 아직 없습니다.</p>'; return; }
+    var ref=parseFloat($('asosRef').value);
+    var vs=items.map(function(x){return x.v;}), lo=Math.min.apply(null,vs), hi=Math.max.apply(null,vs);
+    $('obsCompare').innerHTML = dotChart(items, isNaN(ref)?null:{label:'기상청 서울(ASOS)', v:ref})+
+      '<p>우리 반 지점 간 차이(모둠 값만): 최저 '+fmt(lo)+' °C ~ 최고 '+fmt(hi)+' °C · <b>'+fmt(hi-lo)+' °C</b></p>';
+  });
+};
+/* 점 그래프: 기온은 0 이 기준점이 아니므로 막대 대신 점. 점·눈금·기준선 모두 X() 하나로 */
+function dotChart(items, ref){
+  var all=items.map(function(x){return x.v;}).concat(ref?[ref.v]:[]);
+  var a=Math.floor(Math.min.apply(null,all))-1, b=Math.ceil(Math.max.apply(null,all))+1;
+  var W=640, L=200, R=20, rowH=30, T=26, Hh=T+items.length*rowH+20;
+  var X=function(v){ return L+(v-a)/(b-a)*(W-L-R); };
+  var g='';
+  for (var t=a;t<=b;t++){ g+='<line x1="'+X(t).toFixed(1)+'" x2="'+X(t).toFixed(1)+'" y1="'+(T-6)+'" y2="'+(Hh-14)+'" stroke="var(--chart-grid)"/><text x="'+X(t).toFixed(1)+'" y="'+(T-10)+'" text-anchor="middle" font-size="11" fill="var(--ink-faint)">'+t+'</text>'; }
+  if (ref) g+='<line x1="'+X(ref.v).toFixed(1)+'" x2="'+X(ref.v).toFixed(1)+'" y1="'+(T-6)+'" y2="'+(Hh-14)+'" stroke="var(--s3)" stroke-width="2" stroke-dasharray="5 4"/><text x="'+X(ref.v).toFixed(1)+'" y="'+(Hh-2)+'" text-anchor="middle" font-size="11" fill="var(--ink-soft)">'+esc(ref.label)+' '+fmt(ref.v)+' °C</text>';
+  items.forEach(function(x,i){ var y=T+i*rowH+rowH/2;
+    g+='<text x="'+(L-10)+'" y="'+(y+4)+'" text-anchor="end" font-size="12.5" fill="var(--ink)">'+esc(x.label)+'</text><circle cx="'+X(x.v).toFixed(1)+'" cy="'+y+'" r="7" fill="var(--s2)"/><text x="'+(X(x.v)+11).toFixed(1)+'" y="'+(y+4)+'" font-size="12" font-weight="700" fill="var(--s2-ink)">'+fmt(x.v)+'</text>'; });
+  return '<svg viewBox="0 0 '+W+' '+Hh+'" width="100%" role="img" aria-label="모둠별 평균 기온 점 그래프 (°C)">'+g+'</svg>';
+}
+
+/* ================= 3차시 ================= */
+function fillYears(a,b){
+  ['tr0','tr1','te0','te1'].forEach(function(id){ var s=$(id); s.innerHTML=''; for(var y=a;y<=b;y++) s.insertAdjacentHTML('beforeend','<option>'+y+'</option>'); });
+  $('tr0').value=TRAIN[0]; $('tr1').value=TRAIN[1]; $('te0').value=TEST[0]; $('te1').value=TEST[1];
+}
+$('splitBtn').onclick = function(){
+  var a=+$('tr0').value,b=+$('tr1').value,c=+$('te0').value,d=+$('te1').value,se=$('season').value;
+  if (a>b||c>d){ alert('시작 연도가 끝 연도보다 늦습니다'); return; }
+  var overlap = !(b<c||d<a);
+  var tr=C.filterRows(FEAT.rows,a,b), te=C.filterRows(FEAT.rows,c,d,se);
+  if (tr.length<500||te.length<200){ alert('자료가 너무 적습니다'); return; }
+  var m=C.trainTree(tr,{maxDepth:+$('depth').value});
+  var rows=[], perYear=[];
+  var mA=C.evaluate(te,C.predictTree(m)), mR=HYP?C.evaluate(te,rulePredict()):null, mD=C.evaluate(te,function(){return 0;});
+  for (var y=c;y<=d;y++){ var t=C.filterRows(FEAT.rows,y,y,se); if(t.length) perYear.push({y:y, m:C.evaluate(t,C.predictTree(m)), share:t.filter(function(r){return r.rain;}).length/t.length}); }
+  $('splitOut').innerHTML = (overlap?'<p class="note model">⚠ 학습 기간과 시험 기간이 겹칩니다. AI가 이미 본 자료로 시험하면 성적이 부풀려집니다.</p>':'')+
+    scoreTable([{name:'😴 무조건 ‘비 안 옴’',m:mD}].concat(mR?[{name:'📏 우리 규칙',m:mR}]:[]).concat([{name:'🤖 AI',m:mA}]), true)+
+    '<h3>시험 연도별 — AI의 비 맞힘률</h3>'+bars(perYear.map(function(p){ return {label:p.y+'년 (비 '+pct(p.share,0)+')', v:p.m.recall*100, text:pct(p.m.recall)}; }),100);
+};
+$('scoreLoad').onclick = function(){
+  jsonp({action:'forecasts'}, function(f){
+    if(!f.ok){ $('scoreOut').innerHTML='<p class="note">'+esc(f.error)+'</p>'; return; }
+    jsonp({action:'truth'}, function(t){
+      if(!t.ok){ $('scoreOut').innerHTML='<p class="note">실제 날씨를 불러오지 못했습니다: '+esc(t.error)+'</p>'; return; }
+      var cls=$('cls').value, truth={};
+      // 실제 날씨는 날짜+반 단위(반마다 예보한 교시가 달라 6시간 창이 다름). 같은 키는 마지막 입력이 우선
+      (t.rows||[]).forEach(function(r){ if(String(r.cls)===cls) truth[String(r.date).slice(0,10)]=r; });
+      var rows=f.rows.filter(function(r){ return String(r.cls)===cls; });
+      var dates=[]; rows.forEach(function(r){ var d=String(r.date).slice(0,10); if(dates.indexOf(d)<0) dates.push(d); });
+      $('scoreDate').innerHTML=dates.map(function(d){return '<option>'+d+'</option>';}).join('');
+      var draw=function(){
+        var d=$('scoreDate').value, tr=truth[d], list=rows.filter(function(r){ return String(r.date).slice(0,10)===d; });
+        if(!tr){ $('scoreOut').innerHTML='<p class="note">'+d+' '+cls+'반 예보 시간대의 실제 날씨를 선생님이 아직 입력하지 않았습니다.</p>'; return; }
+        var real=tr.rain, ok=function(x){ return x===real ? '✔' : '✘'; }, tot={p:0,r:0,a:0};
+        var body=list.map(function(r){ tot.p+=r.proverb===real; tot.r+=r.rule===real; tot.a+=r.ai===real;
+          return '<tr><td>'+esc(r.group)+'모둠</td><td>'+esc(r.issued)+'</td><td>'+esc(r.proverb)+' '+ok(r.proverb)+'</td><td>'+esc(r.rule)+' '+ok(r.rule)+'</td><td>'+esc(r.ai)+' '+ok(r.ai)+'</td></tr>'; }).join('');
+        $('scoreOut').innerHTML='<p>실제(예보 후 '+esc(list[0]&&list[0].H||H)+'시간 안): <b>'+esc(real)+'</b>'+(tr.mm!==''?' ('+esc(tr.mm)+' mm)':'')+'</p><table class="t"><tr><th>모둠</th><th>예보 시각</th><th>🧓 속담</th><th>📏 규칙</th><th>🤖 AI</th></tr>'+body+
+          '<tr><th colspan="2">맞힌 모둠 수</th><th>'+tot.p+'/'+list.length+'</th><th>'+tot.r+'/'+list.length+'</th><th>'+tot.a+'/'+list.length+'</th></tr></table>';
+      };
+      $('scoreDate').onchange=draw; if(dates.length) draw(); else $('scoreOut').innerHTML='<p class="note">우리 반 예보 카드가 아직 없습니다.</p>';
+    });
+  });
+};
+})();
+</script>
+</body>
+</html>

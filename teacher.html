@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 예보관 · 교사용</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--ground:#F7F5F1;--surface:#fff;--surface-2:#F1EEE8;--ink:#191E22;--ink-soft:#525A62;--rule:#DFD9CF;--accent:#1D5E6B;--on-accent:#fff;--good:#1F6B3A;--danger:#9B3626;--ochre:#8A5A22}
+@media (prefers-color-scheme:dark){:root{--ground:#131719;--surface:#1A1F22;--surface-2:#20262A;--ink:#EDEAE4;--ink-soft:#AEB5BB;--rule:#2C3439;--accent:#63B4C0;--on-accent:#0F1416;--good:#6FBE8B;--danger:#E0806B;--ochre:#D0A264}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"Pretendard","IBM Plex Sans KR",-apple-system,"Segoe UI","Malgun Gothic",sans-serif;font-size:16px;line-height:1.7}
+.wrap{max-width:960px;margin:0 auto;padding:24px 20px 60px}
+h1{font-size:28px;margin:0 0 6px} h2{font-size:19px;margin:0 0 10px}
+section{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px 20px;margin:16px 0}
+.note{font-size:14px;color:var(--ink-soft);background:var(--surface-2);border-radius:10px;padding:10px 14px;margin:10px 0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+input,select,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:6px 9px}
+input[type=text]{min-width:280px;flex:1}
+textarea{width:100%;min-height:150px;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.btn{font:inherit;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);padding:7px 15px;border-radius:10px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+table{border-collapse:collapse;width:100%;font-size:14px} td,th{border:1px solid var(--rule);padding:5px 8px;text-align:left}
+.ok{color:var(--good);font-weight:700} .bad{color:var(--danger);font-weight:700}
+code{background:var(--surface-2);padding:1px 5px;border-radius:5px}
+.drop{display:block;border:2px dashed var(--accent);border-radius:14px;padding:30px 16px;text-align:center;color:var(--accent);font-weight:600;cursor:pointer;margin:12px 0}
+.drop.over{background:var(--surface-2)}
+small{color:var(--ink-soft)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body><div class="wrap">
+<p><a href="./">← 학생 화면</a></p>
+<h1>AI 예보관 · 교사용</h1>
+<p>기상 빅데이터 준비 · 실시간 연결 설정 · 실제 날씨 입력(채점용). 이 페이지 주소는 학생에게 공유하지 마세요.</p>
+
+<section>
+  <h2>① 기상청 ASOS 시간자료 → 웹앱 자료 파일 만들기</h2>
+  <details open><summary><b>내려받기 순서(기상자료개방포털)</b></summary>
+  <ol>
+    <li><a href="https://data.kma.go.kr" target="_blank" rel="noopener">data.kma.go.kr</a> 로그인(무료 회원가입)</li>
+    <li>데이터 › 기상관측 › 지상 › <b>종관기상관측(ASOS)</b> › <b>자료</b> 탭</li>
+    <li>자료형태 <b>시간 자료</b> · 지점 <b>서울(108)</b> · 요소 <b>기온, 강수, 바람, 기압, 습도</b>(넉넉히 골라도 됨)</li>
+    <li>기간: 시간 자료는 <b>1회 최대 1년</b> → 2016-01-01 00시 ~ 2016-12-31 23시처럼 <b>한 해씩</b> 조회 → <b>CSV</b> 내려받기, 2025년까지 10번 반복<br>
+        <small>(긴 기간을 한 번에 받으려면 ‘파일셋’ 탭의 ZIP을 받아도 됩니다. ZIP도 그대로 넣으면 됩니다)</small></li>
+    <li>받은 파일 <b>10개를 아래 상자에 한꺼번에 끌어다 놓기</b>(순서·파일 이름·중복 상관없음, CSV·ZIP 모두 가능)</li>
+    <li>연도별 표에서 빠진 해가 없는지 확인 → <b>asos_108_hourly.csv 내려받기</b> → 저장소 <code>data/</code> 폴더에 넣고 커밋</li>
+  </ol></details>
+  <label id="drop" class="drop" for="asosFiles">여기에 CSV·ZIP 파일을 끌어다 놓거나 눌러서 고르세요<input type="file" id="asosFiles" accept=".csv,.zip" multiple hidden></label>
+  <div id="asosOut"></div>
+</section>
+
+<section>
+  <h2>② 실시간 연결(Apps Script) 설정</h2>
+  <div class="row"><label>웹앱 주소(/exec) <input type="text" id="gas" placeholder="https://script.google.com/macros/s/…/exec"></label></div>
+  <div class="row"><label>WRITE_TOKEN <input type="text" id="tok" style="min-width:140px;flex:0"></label>
+    <label>출구 카드 구글 설문 주소(선택) <input type="text" id="form"></label></div>
+  <div class="row"><button class="btn" id="save">저장·연결 시험</button><span id="ping"></span></div>
+  <div class="row"><label>학생용 링크 <input type="text" id="stuLink" readonly></label><button class="btn ghost" id="copy">복사</button></div>
+  <p class="note">학생 링크에는 Apps Script 주소만 들어갑니다(토큰은 들어가지 않음). 학생 기기에 한 번 열면 그 기기에 저장됩니다.</p>
+</section>
+
+<section>
+  <h2>③ 실제 날씨 입력(3차시 채점용)</h2>
+  <p class="note">2차시 예보 카드의 기준은 “예보한 때부터 앞으로 6시간 안에 서울(ASOS) 강수량 0.1 mm 이상 = 비, 아니면 비 안 옴”입니다. 반마다 예보한 교시가 다르므로 <b>반별로</b> 그 반의 예보 시각부터 6시간 동안의 서울 시간별 강수(기상자료개방포털·날씨누리)를 확인해 입력합니다.</p>
+  <div class="row"><label>예보한 날짜 <input type="date" id="tDate"></label>
+    <label>반 <select id="tCls"></select></label>
+    <label>실제 <select id="tRain"><option>비</option><option>비 안 옴</option></select></label>
+    <label>강수량(mm) <input type="number" step="0.1" id="tMm" style="width:90px"></label>
+    <button class="btn" id="tSend">저장</button><span id="tMsg"></span></div>
+</section>
+
+<section>
+  <h2>④ 센서 브리지 상태</h2>
+  <div class="row"><button class="btn ghost" id="liveChk">최신 기록 확인</button><span id="liveTxt"></span></div>
+  <p class="note">브리지 실행: <code>python bridge/pasco_bridge.py --weather 센서ID --gas 웹앱주소 --token 토큰</code> · 자세한 순서는 저장소 <code>bridge/README.md</code></p>
+</section>
+</div>
+
+<script src="core.js"></script>
+<script>
+(function(){
+var C=window.Core, $=function(i){return document.getElementById(i);};
+var LS={get:function(k,d){try{var v=localStorage.getItem('aif_'+k);return v===null?d:v;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem('aif_'+k,v);}catch(e){}}};
+$('gas').value=LS.get('gas',''); $('tok').value=LS.get('tok',''); $('form').value=LS.get('form','');
+function link(){ var u=new URL('./', location.href); if($('gas').value) u.searchParams.set('gas',$('gas').value.trim()); if($('form').value) u.searchParams.set('form',$('form').value.trim()); $('stuLink').value=u.toString(); }
+link();
+function jsonp(p,cb){ var g=$('gas').value.trim(); if(!g){cb({ok:false,error:'주소 없음'});return;}
+  var n='cb'+Date.now(), s=document.createElement('script'); window[n]=function(d){cb(d);delete window[n];s.remove();};
+  s.src=g+'?'+new URLSearchParams(p)+'&callback='+n; s.onerror=function(){cb({ok:false,error:'연결 실패'});}; document.body.appendChild(s); }
+$('save').onclick=function(){ LS.set('gas',$('gas').value.trim()); LS.set('tok',$('tok').value.trim()); LS.set('form',$('form').value.trim()); link();
+  jsonp({action:'ping'},function(d){ $('ping').innerHTML=d.ok?'<span class="ok">연결됨 v'+d.ver+'</span>':'<span class="bad">'+d.error+'</span>'; }); };
+$('copy').onclick=function(){ $('stuLink').select(); try{ navigator.clipboard.writeText($('stuLink').value); }catch(e){ document.execCommand('copy'); } };
+$('tDate').value=C.fmtTime(Date.now()).slice(0,10);
+for(var i=1;i<=12;i++) $('tCls').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'반</option>'); $('tCls').value='2';
+$('tSend').onclick=function(){
+  fetch($('gas').value.trim(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({kind:'truth',token:$('tok').value.trim(),date:$('tDate').value,cls:$('tCls').value,rain:$('tRain').value,mm:$('tMm').value})})
+  .then(function(){ $('tMsg').textContent='보냄 — 학생 화면 3차시에서 확인(토큰이 틀리면 저장되지 않음)'; });
+};
+$('liveChk').onclick=function(){ jsonp({action:'latest'},function(d){ $('liveTxt').textContent=d.ok&&d.latest?('마지막 '+d.latest.ts+' · '+d.latest.p+' hPa · 계열 '+d.series.length+'점'):(d.error||'기록 없음'); }); };
+
+/* ASOS 변환: 여러 CSV·ZIP → 하나로 합치기 */
+var drop=$('drop');
+['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.add('over'); }); });
+['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.remove('over'); }); });
+drop.addEventListener('drop',function(e){ handle([].slice.call(e.dataTransfer.files)); });
+$('asosFiles').onchange=function(){ handle([].slice.call(this.files)); this.value=''; };
+var LOADED=[];  // [{name, rows}] — 여러 번 나눠 넣어도 누적
+function handle(files){
+  if(!files.length) return;
+  $('asosOut').innerHTML='<p class="note">읽는 중… ('+files.length+'개)</p>';
+  Promise.all(files.map(function(f){
+    return f.arrayBuffer().then(function(b){
+      if(/\.zip$/i.test(f.name)) return C.readZip(b).then(function(es){ return es.map(function(e){ return {name:f.name+' › '+e.name, text:C.decodeKorean(new Uint8Array(e.bytes))}; }); });
+      return [{name:f.name, text:C.decodeKorean(new Uint8Array(b))}];
+    }).catch(function(e){ return [{name:f.name, err:e.message}]; });
+  })).then(function(groups){
+    var log=[];
+    [].concat.apply([],groups).forEach(function(x){
+      if(x.err){ log.push('✘ '+x.name+' · '+x.err); return; }
+      try{ var r=C.parseAnyWeather(x.text); LOADED.push({name:x.name, rows:r.rows}); log.push('✔ '+x.name+' · '+r.rows.length.toLocaleString()+'행'+(r.kind==='slim'?' (웹앱 자료 형식)':'')); }
+      catch(e){ log.push('✘ '+x.name+' · '+e.message); }
+    });
+    render(log);
+  });
+}
+function render(log){
+  if(!LOADED.length){ $('asosOut').innerHTML='<p class="note">'+log.join('<br>')+'</p>'; return; }
+  var all=C.mergeRows(LOADED.map(function(x){return x.rows;}));
+  var raw=LOADED.reduce(function(s,x){return s+x.rows.length;},0);
+  var cov=C.yearCoverage(all), csv=C.toSlimCSV(all), slim=C.parseSlim(csv), F=C.buildFeatures(slim,6);
+  var stns={}; LOADED.forEach(function(x){ x.rows.forEach(function(r){ if(r.stn) stns[r.stn]=1; }); });
+  var ys=cov.map(function(c){return c.year;}), gaps=[];
+  for(var y=ys[0];y<=ys[ys.length-1];y++) if(ys.indexOf(y)<0) gaps.push(y);
+  var miss={p:0,rh:0,ta:0,wd:0,ws:0}; slim.forEach(function(r){ ['p','rh','ta','wd','ws'].forEach(function(k){ if(isNaN(r[k])) miss[k]++; }); });
+  var rain=F.rows.filter(function(r){return r.rain;}).length;
+  var tbl='<table><tr><th>연도</th><th class="num">행 수</th><th class="num">그해 전체 시간</th><th>상태</th></tr>'+cov.map(function(c){
+    var ok=c.n>=c.expected*0.98; return '<tr><td>'+c.year+'</td><td class="num">'+c.n.toLocaleString()+'</td><td class="num">'+c.expected.toLocaleString()+'</td><td class="'+(ok?'ok':'bad')+'">'+(ok?'✔':'일부만 있음')+'</td></tr>'; }).join('')+'</table>';
+  var warn=[];
+  if(gaps.length) warn.push('빠진 해: '+gaps.join(', '));
+  if(Object.keys(stns).length>1) warn.push('지점이 여러 개 섞였습니다: '+Object.keys(stns).join(', ')+' — 서울(108)만 넣으세요');
+  if(miss.p>slim.length*0.5) warn.push('현지기압 열이 대부분 비었습니다 — 요소에서 ‘기압’을 골랐는지 확인하세요');
+  if(miss.ws>slim.length*0.5||miss.wd>slim.length*0.5) warn.push('바람 열이 대부분 비었습니다 — 요소에서 ‘바람’을 골랐는지 확인하세요');
+  var card='[데이터 카드]\n출처: 기상청 기상자료개방포털 종관기상관측(ASOS) 시간자료 https://data.kma.go.kr\n지점: '+Object.keys(stns).join(',')+'\n기간: '+C.fmtHour(slim[0].ms)+' ~ '+C.fmtHour(slim[slim.length-1].ms)+'\n행 수: '+slim.length+' (올린 파일 합계 '+raw+'행, 겹친 시각 '+(raw-slim.length)+'행 하나로 정리)\n'+
+    '결측: 현지기압 '+miss.p+' · 습도 '+miss.rh+' · 기온 '+miss.ta+' · 풍속 '+miss.ws+' · 풍향 '+miss.wd+'\n단위: 기온 °C · 습도 % · 현지기압 hPa · 풍속 m/s · 풍향 °(16방위) · 강수량 mm\n'+
+    '처리: 강수량 빈칸 = 0(무강수). 겨울철(11~3월)에는 강수량이 3시간 간격으로 제공될 수 있어 6시간 창으로 판정함. 학습 행은 3시간 전 기압·이후 6시간 기록·기온·습도·바람이 모두 있는 시간만('+F.rows.length+'행, 제외 '+F.dropped+')\n'+
+    '이후 6시간 안 비(0.1 mm 이상) 비율: '+(rain/F.rows.length*100).toFixed(1)+'%\n취득일: '+C.fmtTime(Date.now()).slice(0,10)+'\n학생 배포: 웹앱 내장(data/asos_108_hourly.csv)';
+  var url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  $('asosOut').innerHTML='<p class="note">이번에 넣은 파일<br>'+log.join('<br>')+'<br><b>지금까지 합친 파일 '+LOADED.length+'개</b> (더 넣으면 계속 합쳐집니다)</p>'+(warn.length?'<p class="bad">⚠ '+warn.join('<br>⚠ ')+'</p>':'<p class="ok">✔ '+ys[0]+'–'+ys[ys.length-1]+' 연속, 빠진 해 없음</p>')+tbl+
+    '<div class="row"><a class="btn" download="asos_108_hourly.csv" href="'+url+'">asos_108_hourly.csv 내려받기 ('+(csv.length/1e6).toFixed(1)+' MB)</a>'+
+    '<button class="btn ghost" id="tryHere" type="button">커밋 전에 이 브라우저에서 바로 써 보기</button><button class="btn ghost" id="clearAll" type="button">처음부터 다시</button><span id="tryMsg"></span></div>'+
+    '<p>아래 데이터 카드를 <code>data/README.md</code>에 붙여 넣으세요.</p><textarea readonly>'+card+'</textarea>';
+  $('clearAll').onclick=function(){ LOADED=[]; $('asosOut').innerHTML=''; };
+  $('tryHere').onclick=function(){ C.idbPut('asos', csv).then(function(){ $('tryMsg').innerHTML=' <span class="ok">저장됨 — 이 브라우저에서 학생 화면을 열면 이 자료로 동작(다른 기기는 커밋 후)</span>'; }).catch(function(e){ $('tryMsg').textContent=' 저장 실패: '+e.message; }); };
+}
+})();
+</script>
+</body>
+</html>

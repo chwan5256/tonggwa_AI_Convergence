@@ -1,0 +1,8 @@
+# 비밀값·개인 기록은 공개 저장소에 올리지 않음
+bridge/config.bat
+bridge/backup/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+desktop.ini
