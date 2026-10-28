@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AI 예보관 · 속담 vs 빅데이터 vs AI</title>
+<title>통합과학2 Ⅲ. 과학과 미래 사회 · AI 융합수업</title>
 <meta name="description" content="통합과학2 Ⅲ. 과학과 미래 사회 — 기상청 10년 빅데이터와 우리 학교 무선센서로 날씨 속담을 검증하고 AI 예보관을 만드는 AI 융합수업 웹앱">
 <style>
 :root{
@@ -121,17 +121,19 @@ table.t td.l,table.t th.l{text-align:left}
 .tag{display:inline-block;font-size:12.5px;border:1px solid var(--rule);border-radius:999px;padding:1px 9px;color:var(--ink-soft);margin:2px 4px 2px 0}
 svg text{font-family:var(--sans)}
 .foot{color:var(--ink-faint);font-size:13px;padding:30px 0 50px}
+.foot p{margin:2px 0}
 @media (max-width:640px){section.step{padding:16px}.bar{grid-template-columns:100px 1fr 56px}}
 @media print{.topbar,.noprint,section.step:not(.printme){display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
 <div class="topbar"><div class="wrap">
-  <span class="brand">AI 예보관<small>통합과학2 · Ⅲ</small></span>
+  <span class="brand">통합과학2 Ⅲ. 과학과 미래 사회<small>AI 융합수업 · AI 예보관</small></span>
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" data-tab="l1">1차시 관측소</button>
-    <button class="tab" role="tab" data-tab="l2">2차시 속담 vs 빅데이터 vs AI</button>
+    <button class="tab" role="tab" data-tab="l2">2차시 속담 vs AI</button>
     <button class="tab" role="tab" data-tab="l3">3차시 채점·한계</button>
+    <button class="tab" role="tab" data-tab="l4">4차시 AI 예보 SSI</button>
   </nav>
   <span class="spacer"></span>
   <span class="who">
@@ -145,7 +147,7 @@ svg text{font-family:var(--sans)}
 <header class="mast">
   <p class="eyebrow">[10통과2-03-02] · [10통과2-03-03] · [10통과2-03-04]</p>
   <h1 id="title">속담 vs 빅데이터 vs AI — 누가 비를 맞힐까?</h1>
-  <p class="dek">과학 원리로 가설을 세우고, 기상청 10년 관측 빅데이터로 검증하고, AI 예보관을 학습시켜 사람이 만든 규칙과 겨룹니다. 마지막엔 우리 학교 무선 날씨센서의 오늘 값으로 실제 예보를 냅니다.</p>
+  <p class="dek" id="dek">과학 원리로 가설을 세우고, 기상청 10년 관측 빅데이터로 검증하고, AI 예보관을 학습시켜 사람이 만든 규칙과 겨룹니다. 마지막엔 우리 학교 무선 날씨센서의 오늘 값으로 실제 예보를 냅니다.</p>
   <div class="row">
     <span class="datachip"><span class="dot" id="dataDot"></span><span id="dataTxt">기상 빅데이터 불러오는 중…</span></span>
     <label class="tbtn hidden" id="dataPick">자료 파일 직접 열기(CSV·ZIP 여러 개 가능) <input type="file" accept=".csv,.zip" id="dataFile" multiple class="hidden"></label>
@@ -304,9 +306,68 @@ svg text{font-family:var(--sans)}
 </section>
 </div>
 
-<p class="foot">자료: 기상청 기상자료개방포털 종관기상관측(ASOS) 서울(108) 시간자료 · 우리 학교 PASCO 무선 날씨센서(PS-3209). 판정 기준(배수 1.5·1.1·0.9)은 수업용 기준이며 통계적 검정이 아닙니다. · AI 예보관 <span id="ver"></span> · 교사가 바이브코딩으로 제작</p>
+<!-- =================== 4차시 =================== -->
+<div data-pane="l4" class="hidden">
+<section class="step">
+  <h2><span class="n">01</span>쟁점: 날씨 예보를 AI에게 맡겨도 될까?<span class="min">5분</span></h2>
+  <div class="grid2">
+    <div class="card"><h3>⚠ 상황 (수업용 가상 상황)</h3><p>AI 예보는 “오늘 저녁 비 안 옴”이었습니다. 그런데 저녁에 짧고 강한 비가 쏟아져 하천 산책로가 잠겼습니다. 사람 예보관도 이런 비를 놓칠 수 있고, 반대로 AI가 사람보다 먼저 위험을 알아챈 날도 있을 수 있습니다. 3차시에서 따져 본 것처럼, 과거 자료로 배운 AI가 드문 날씨를 얼마나 맞힐 수 있는지는 아직 따져 볼 문제입니다. 이 오보의 책임은 누구에게 있을까요?</p></div>
+    <div class="card"><h3>⚡ 데이터센터(AI 포함)의 전기</h3><p>전 세계 데이터센터 전체의 전력 소비는 2024년 약 415 TWh로 <b>추정</b>되고, 2030년에는 약 945 TWh까지 늘어날 것으로 <b>전망</b>됩니다(IEA, 2025, 기준 시나리오). 날씨 AI만의 값이 아닙니다. 한편 AI 예보 모델은 학습이 끝나면 예보 계산 자체는 기존 수치예보보다 훨씬 빠르다고 알려져 있습니다(GraphCast). 단, 예보의 출발점(초기값)은 여전히 기존 관측과 수치예보 자료에 기대고 있습니다. <a href="https://www.iea.org/reports/energy-and-ai" target="_blank" rel="noopener">IEA 보고서</a></p></div>
+  </div>
+  <p class="q">우리 사회는 날씨 예보를 AI에게 얼마나, 어떤 조건에서 맡겨야 할까?</p>
+</section>
+
+<section class="step">
+  <h2><span class="n">02</span>우리가 직접 모은 근거<span class="min">5분</span></h2>
+  <p>1~3차시 활동 결과가 이 기기에 <b>반·모둠별로</b> 자동으로 모입니다(위쪽 반·모둠 선택 기준). 제안서에 쓸 근거를 고르세요.</p>
+  <div id="evList"></div>
+  <textarea id="evExtra" placeholder="직접 더 쓰는 근거(예: 3차시 채점에서 우리 반 AI 예보관은 5모둠 중 4모둠이 맞혔다)"></textarea>
+</section>
+
+<section class="step">
+  <h2><span class="n">03</span>이해관계자 역할<span class="min">8분</span></h2>
+  <div class="grid3" id="roleList"></div>
+  <p class="note" id="roleQ">역할을 고르면 그 관점에서 생각할 질문이 나옵니다.</p>
+</section>
+
+<section class="step">
+  <h2><span class="n">04</span>과학 윤리에 근거한 조건부 정책 제안서<span class="min">15분</span></h2>
+  <div class="row"><b>입장</b>
+    <label><input type="radio" name="stance" value="찬성"> 찬성</label>
+    <label><input type="radio" name="stance" value="조건부 찬성"> 조건부 찬성</label>
+    <label><input type="radio" name="stance" value="반대"> 반대</label></div>
+  <textarea id="claim" placeholder="핵심 주장 — 형식: AI 예보는 ___ 조건에서 ___에 활용해야 한다 / 하지 말아야 한다"></textarea>
+  <p><b>과학 윤리 원칙과 조건</b> (하나 이상 고르고 조건을 쓰세요)</p>
+  <div id="prinList"></div>
+  <textarea id="rebut" placeholder="예상 반론 1개와 그에 대한 재반박(또는 수용)"></textarea>
+  <div class="row"><button class="btn ghost" id="polPrev" type="button">제안서 미리 보기</button><button class="btn" id="polSend" type="button">제출</button><span id="polMsg" class="tag"></span></div>
+  <div id="polOut"></div>
+</section>
+
+<section class="step">
+  <h2><span class="n">05</span>우리 반 대시보드<span class="min">12분</span></h2>
+  <div class="row"><button class="btn ghost" id="polLoad" type="button">우리 반 제안 불러오기</button><span id="polCount" class="tag"></span></div>
+  <div id="dash"></div>
+</section>
+
+<section class="step">
+  <h2><span class="n">06</span>점검과 성찰<span class="min">5분</span></h2>
+  <table class="t"><tr><th>수준</th><th class="l">[10통과2-03-04] 수업 점검 기준(교사 설계)</th></tr>
+    <tr><td>상</td><td class="l">AI 기상예보를 둘러싼 SSI에서 여러 이해관계자의 관점을 분석하고, 과학 윤리에 근거한 조건부 해결 방안을 논증한다.</td></tr>
+    <tr><td>중</td><td class="l">SSI에 대한 자신의 입장을 근거와 함께 제시하고, 과학 윤리의 중요성을 설명한다.</td></tr>
+    <tr><td>하</td><td class="l">SSI에 대한 자신의 입장을 제시한다.</td></tr></table>
+  <p class="note">성찰: 4차시 동안 내 생각이 바뀐 지점은? 과학기술을 이용할 때 내가 꼭 지키고 싶은 조건 한 가지는?</p>
+</section>
+</div>
+
+<div class="foot">
+  <p><b>자료</b>: 기상청 기상자료개방포털 종관기상관측(ASOS) 서울(108) 시간자료 · 우리 학교 PASCO 무선 날씨센서(PS-3209) · IEA <i>Energy and AI</i>(2025)</p>
+  <p><b>판정 기준</b>: 가설 판정 배수 1.5·1.1·0.9와 최소 50시간은 수업용 기준이며 통계적 검정이 아닙니다.</p>
+  <p><b>버전</b>: <span id="ver"></span></p>
+</div>
 </main>
 
+<script src="config.js"></script>
 <script src="core.js"></script>
 <script>
 (function(){
@@ -319,12 +380,13 @@ var LS = { get:function(k,d){ try{ var v=localStorage.getItem('aif_'+k); return 
 var esc = function(s){ return String(s===undefined||s===null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); };
 var pct = function(x,d){ return isNaN(x)?'—':(x*100).toFixed(d===undefined?1:d)+'%'; };
 var fmt = function(x,d){ return isNaN(x)?'—':Number(x).toFixed(d===undefined?1:d); };
-$('ver').textContent = 'v'+C.VERSION;
+$('ver').textContent = 'v'+C.VERSION+' (2026-10-28)';
 
 /* ---------- 설정 ---------- */
 if (qs.get('gas')) LS.set('gas', qs.get('gas'));
 if (qs.get('form')) LS.set('form', qs.get('form'));
-var GAS = LS.get('gas','');
+var CFG = window.AIF_CONFIG || {};
+var GAS = (CFG.GAS || LS.get('gas','')).trim();
 var H = [6,12,24].indexOf(+qs.get('h'))>=0 ? +qs.get('h') : 6;
 var TRAIN = [2016,2022], TEST = [2023,2025];
 document.querySelectorAll('.hH').forEach(function(e){ e.textContent = H; });
@@ -339,18 +401,24 @@ $('themeBtn').onclick = function(){ var cur=document.documentElement.getAttribut
   var nx = dark?'light':'dark'; document.documentElement.setAttribute('data-theme',nx); LS.set('theme',nx); };
 
 /* ---------- 반·모둠 ---------- */
-for (var i=1;i<=12;i++) $('cls').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'반</option>');
-for (i=1;i<=6;i++) $('grp').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'모둠</option>');
+(CFG.CLASSES||[1,2,3,4,5,6,7]).forEach(function(i){ $('cls').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'반</option>'); });
+for (var i=1;i<=6;i++) $('grp').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'모둠</option>');
 $('cls').value = LS.get('cls','2'); $('grp').value = LS.get('grp','1');
-$('cls').onchange = function(){ LS.set('cls',this.value); }; $('grp').onchange = function(){ LS.set('grp',this.value); };
+$('cls').onchange = function(){ LS.set('cls',this.value); if(typeof renderEv==='function') renderEv(); }; $('grp').onchange = function(){ LS.set('grp',this.value); if(typeof renderEv==='function') renderEv(); };
 
 /* ---------- 탭 ---------- */
 function showTab(t){
   document.querySelectorAll('.tab').forEach(function(b){ b.setAttribute('aria-selected', b.dataset.tab===t); });
   document.querySelectorAll('[data-pane]').forEach(function(p){ p.classList.toggle('hidden', p.dataset.pane!==t); });
   LS.set('tab',t);
-  var T={l1:['1차시','우리 학교 기상관측소 세우기'],l2:['2차시','속담 vs 빅데이터 vs AI — 누가 비를 맞힐까?'],l3:['3차시','예보 채점과 AI의 한계']}[t];
-  if (T){ $('title').textContent=T[1]; document.title='AI 예보관 · '+T[0]+' '+T[1]; }
+  var T={l1:['1차시','우리 학교 기상관측소 세우기'],l2:['2차시','속담 vs 빅데이터 vs AI — 누가 비를 맞힐까?'],l3:['3차시','예보 채점과 AI의 한계'],l4:['4차시','날씨 예보를 AI에게 맡겨도 될까?']}[t];
+  var DEK={l1:'우리 학교 곳곳에 무선센서를 두고 기상청 관측소 값과 비교해 관측의 대표성을 따져 본 뒤, 날씨 속담을 데이터로 확인할 수 있는 탐구 질문으로 바꿉니다.',
+    l2:'과학 원리로 가설을 세우고, 기상청 10년 관측 빅데이터로 검증하고, AI 예보관을 학습시켜 사람이 만든 규칙과 겨룹니다. 마지막엔 우리 학교 무선 날씨센서의 오늘 값으로 오늘 저녁까지의 비를 예보합니다.',
+    l3:'어제 낸 예보를 실제 날씨로 채점하고, 학습 기간과 시험 기간을 나눠 과거 자료로 배운 AI의 한계를 확인합니다.',
+    l4:'1~3차시에 직접 얻은 근거로 이해관계자의 관점을 분석하고, 과학 윤리에 근거한 조건부 정책을 제안합니다.'};
+  if (DEK[t]) $('dek').textContent=DEK[t];
+  if (T){ $('title').textContent=T[1]; document.title=T[0]+' '+T[1]+' · 통합과학2 AI 융합수업'; }
+  if (t==='l4' && typeof renderEv==='function') renderEv();
 }
 document.querySelectorAll('.tab').forEach(function(b){ b.onclick = function(){ showTab(b.dataset.tab); }; });
 showTab(qs.get('tab') || LS.get('tab','l2'));
@@ -359,10 +427,11 @@ showTab(qs.get('tab') || LS.get('tab','l2'));
 function jsonp(params, cb){
   if (!GAS) { cb({ok:false,error:'선생님이 실시간 주소(Apps Script)를 아직 연결하지 않았습니다'}); return; }
   var name = 'cb'+Date.now()+Math.floor(Math.random()*1000), s = document.createElement('script'), done=false;
-  window[name] = function(d){ if(done) return; done=true; cb(d); delete window[name]; s.remove(); };
+  var fin = function(d){ if(done) return; done=true; s.remove(); window[name]=function(){}; cb(d); };
+  window[name] = fin;
   s.src = GAS + (GAS.indexOf('?')<0?'?':'&') + new URLSearchParams(params).toString() + '&callback='+name;
-  s.onerror = function(){ if(!done){ done=true; cb({ok:false,error:'연결 실패'}); } };
-  setTimeout(function(){ if(!done){ done=true; cb({ok:false,error:'응답 시간 초과'}); } }, 15000);
+  s.onerror = function(){ fin({ok:false,error:'연결 실패'}); };
+  setTimeout(function(){ fin({ok:false,error:'응답 시간 초과'}); }, 15000);
   document.body.appendChild(s);
 }
 function post(body){
@@ -500,6 +569,7 @@ if (HYP) chooseHyp(HYP);
 $('testBtn').onclick = function(){
   if (!HYP){ alert('02에서 속담을 먼저 고르세요'); return; }
   var ct = C.crossTab(trainTest().tr, C.condFn(curCond(HYP))), v = C.verdict(ct);
+  saveEv('test','2차시 가설 검증', '“'+C.HYPS[HYP].text(TH[HYP])+'” → 조건일 때 비 올 확률 '+pct(ct.pCond)+', 평소 '+pct(ct.pBase)+' ('+(isNaN(ct.ratio)?'—':ct.ratio.toFixed(2)+'배')+') · '+v.label+' ['+TRAIN[0]+'–'+TRAIN[1]+' 기상청 자료]');
   var R=C.VERDICT_RULE;
   $('testOut').innerHTML =
     '<table class="t num"><tr><th class="l">'+TRAIN[0]+'–'+TRAIN[1]+' 매시간 기록</th><th>이후 '+H+'시간 안 비</th><th>비 안 옴</th><th>합계</th><th>비 올 확률</th></tr>'+
@@ -546,6 +616,7 @@ $('trapBtn').onclick = function(){
   var s=trainTest();
   var md=C.evaluate(s.te,function(){return 0;}), mr=C.evaluate(s.te,rulePredict()), ma=C.evaluate(s.te,C.predictTree(MODEL));
   var nRain=s.tr.filter(function(r){return r.rain;}).length, k=(s.tr.length-nRain)/nRain;
+  saveEv('trap','2차시 정확도의 함정', '시험 '+TEST[0]+'–'+TEST[1]+': 무조건 비 안 옴 정확도 '+pct(md.acc)+'(비 맞힘 '+pct(md.recall)+'), 우리 규칙 정확도 '+pct(mr.acc)+'·비 맞힘 '+pct(mr.recall)+', AI 정확도 '+pct(ma.acc)+'·비 맞힘 '+pct(ma.recall));
   var html = scoreTable([{name:'😴 무조건 ‘비 안 옴’',m:md},{name:'📏 우리 규칙',m:mr},{name:'🤖 AI',m:ma}], false)+
     '<p class="note">시험 기간 '+s.te.length.toLocaleString()+'시각 중 <b>이후 '+H+'시간 안에 비가 온 시각</b>은 '+(md.fn).toLocaleString()+'개(<b>'+pct(md.fn/md.n)+'</b>)뿐입니다. 그래서 “무조건 비 안 옴”만 외쳐도 정확도가 '+pct(md.acc)+'입니다.</p>'+
     '<button class="btn" id="trapReveal" type="button">비 온 시간만 따로 보기</button><div id="trapMore"></div>';
@@ -558,6 +629,7 @@ $('trapBtn').onclick = function(){
     $('wBtn').onclick = function(){
       MODELW = C.trainTree(s.tr,{maxDepth:MODEL.opts.maxDepth, weightRain:k});
       var mw=C.evaluate(s.te,C.predictTree(MODELW));
+      saveEv('weight','2차시 비 놓침 벌점 AI', '벌점 '+k.toFixed(1)+'배로 다시 가르친 AI: 정확도 '+pct(mw.acc)+'·비 맞힘 '+pct(mw.recall)+'·헛경보 '+mw.fp.toLocaleString()+'회 (처음 AI 정확도 '+pct(ma.acc)+'·비 맞힘 '+pct(ma.recall)+')');
       $('wOut').innerHTML = scoreTable([{name:'🤖 AI(처음)',m:ma},{name:'🤖 AI(비 놓침 벌점 '+k.toFixed(1)+'배)',m:mw}], true)+
         '<p class="note">벌점 '+k.toFixed(1)+'배 = 학습 자료에서 “비 안 옴” 시간 수 ÷ “비” 시간 수. 정확도와 비 맞힘률은 어떻게 바뀌었나요? 헛경보는? 재난 대비에는 어느 AI가 나을까요?</p>';
     };
@@ -652,6 +724,7 @@ $('obsLoad').onclick = function(){
     if(!items.length){ $('obsCompare').innerHTML='<p class="note">우리 반 자료가 아직 없습니다.</p>'; return; }
     var ref=parseFloat($('asosRef').value);
     var vs=items.map(function(x){return x.v;}), lo=Math.min.apply(null,vs), hi=Math.max.apply(null,vs);
+    saveEv('obs','1차시 교내 관측망', '우리 반 '+items.length+'개 지점 평균 기온 '+fmt(lo)+'~'+fmt(hi)+' °C, 지점 간 차이 '+fmt(hi-lo)+' °C'+(isNaN(ref)?'':' (같은 시각 서울 관측소 '+fmt(ref)+' °C)'));
     $('obsCompare').innerHTML = dotChart(items, isNaN(ref)?null:{label:'기상청 서울(ASOS)', v:ref})+
       '<p>우리 반 지점 간 차이(모둠 값만): 최저 '+fmt(lo)+' °C ~ 최고 '+fmt(hi)+' °C · <b>'+fmt(hi-lo)+' °C</b></p>';
   });
@@ -685,6 +758,7 @@ $('splitBtn').onclick = function(){
   var rows=[], perYear=[];
   var mA=C.evaluate(te,C.predictTree(m)), mR=HYP?C.evaluate(te,rulePredict()):null, mD=C.evaluate(te,function(){return 0;});
   for (var y=c;y<=d;y++){ var t=C.filterRows(FEAT.rows,y,y,se); if(t.length) perYear.push({y:y, m:C.evaluate(t,C.predictTree(m)), share:t.filter(function(r){return r.rain;}).length/t.length}); }
+  saveEv('split','3차시 기간 나누기', '학습 '+a+'–'+b+' → 시험 '+c+'–'+d+'('+$('season').selectedOptions[0].text+'): AI 정확도 '+pct(mA.acc)+'·비 맞힘 '+pct(mA.recall)+(overlap?' (기간 겹침)':''));
   $('splitOut').innerHTML = (overlap?'<p class="note model">⚠ 학습 기간과 시험 기간이 겹칩니다. AI가 이미 본 자료로 시험하면 성적이 부풀려집니다.</p>':'')+
     scoreTable([{name:'😴 무조건 ‘비 안 옴’',m:mD}].concat(mR?[{name:'📏 우리 규칙',m:mR}]:[]).concat([{name:'🤖 AI',m:mA}]), true)+
     '<h3>시험 연도별 — AI의 비 맞힘률</h3>'+bars(perYear.map(function(p){ return {label:p.y+'년 (비 '+pct(p.share,0)+')', v:p.m.recall*100, text:pct(p.m.recall)}; }),100);
@@ -708,9 +782,85 @@ $('scoreLoad').onclick = function(){
           return '<tr><td>'+esc(r.group)+'모둠</td><td>'+esc(r.issued)+'</td><td>'+esc(r.proverb)+' '+ok(r.proverb)+'</td><td>'+esc(r.rule)+' '+ok(r.rule)+'</td><td>'+esc(r.ai)+' '+ok(r.ai)+'</td></tr>'; }).join('');
         $('scoreOut').innerHTML='<p>실제(예보 후 '+esc(list[0]&&list[0].H||H)+'시간 안): <b>'+esc(real)+'</b>'+(tr.mm!==''?' ('+esc(tr.mm)+' mm)':'')+'</p><table class="t"><tr><th>모둠</th><th>예보 시각</th><th>🧓 속담</th><th>📏 규칙</th><th>🤖 AI</th></tr>'+body+
           '<tr><th colspan="2">맞힌 모둠 수</th><th>'+tot.p+'/'+list.length+'</th><th>'+tot.r+'/'+list.length+'</th><th>'+tot.a+'/'+list.length+'</th></tr></table>';
+        saveEv('score','3차시 예보 채점', d+' '+cls+'반, 실제 '+real+': 속담 '+tot.p+'/'+list.length+' · 규칙 '+tot.r+'/'+list.length+' · AI '+tot.a+'/'+list.length+' 모둠 적중');
       };
       $('scoreDate').onchange=draw; if(dates.length) draw(); else $('scoreOut').innerHTML='<p class="note">우리 반 예보 카드가 아직 없습니다.</p>';
     });
+  });
+};
+
+/* ================= 근거 모으기(1~3차시 → 4차시) ================= */
+function saveEv(key, label, text){
+  var k='evidence_'+$('cls').value+'_'+$('grp').value, m={}; try{ m=JSON.parse(LS.get(k,'{}')); }catch(e){}
+  m[key]={label:label, text:text, at:C.fmtTime(Date.now()).slice(0,16)}; LS.set(k, JSON.stringify(m));
+}
+function getEv(){ try{ return JSON.parse(LS.get('evidence_'+$('cls').value+'_'+$('grp').value,'{}')); }catch(e){ return {}; } }
+
+/* ================= 4차시 ================= */
+var ROLES = {
+  '시민': '예보가 더 빠르고 자주 갱신되면 내 생활에서 무엇이 좋아질까? 오보·경보로 어떤 피해가 생기고, 무엇을 알 권리가 있을까?',
+  '기상청 예보관': 'AI가 더 빠르고 싸게 예보를 만든다면 예보관은 무엇에 더 집중할 수 있을까? AI 예보와 내 판단이 다를 때 누가 최종 결정을 해야 할까?',
+  'AI 개발 기업': 'AI 예보의 장점은 무엇이고, 한계를 사용자에게 어떻게 알려야 할까? 학습 자료는 공정한가?',
+  '재난 대응 기관': '비를 놓치는 것과 헛경보 중 무엇이 더 위험할까? 어떤 기준으로 경보를 내려야 할까?',
+  '환경 단체': 'AI 계산에 드는 전기는 기후 변화에 어떤 영향을 줄까? 그 대가를 감수할 만한가?'
+};
+var PRINS = { '책임': '오보가 났을 때 누가 어떻게 책임지는가', '투명성': 'AI가 왜 그렇게 예보했는지, 한계가 무엇인지 공개하는가',
+  '공정성': '지역·계층에 따라 예보 정확도나 혜택이 달라지지 않는가', '지속 가능성': '전력·자원 사용이 기후와 환경에 부담을 주지 않는가' };
+var ROLE = LS.get('role','');
+$('roleList').innerHTML = Object.keys(ROLES).map(function(k){ return '<button type="button" class="card pick" data-r="'+k+'" aria-pressed="'+(ROLE===k)+'"><h3>'+k+'</h3></button>'; }).join('');
+function showRole(){ document.querySelectorAll('#roleList .pick').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.r===ROLE); });
+  $('roleQ').innerHTML = ROLE ? '<b>'+esc(ROLE)+'</b>의 관점: '+esc(ROLES[ROLE]) : '역할을 고르면 그 관점에서 생각할 질문이 나옵니다.'; }
+document.querySelectorAll('#roleList .pick').forEach(function(b){ b.onclick=function(){ ROLE=b.dataset.r; LS.set('role',ROLE); showRole(); }; });
+showRole();
+$('prinList').innerHTML = Object.keys(PRINS).map(function(k){ return '<div class="row"><label style="min-width:130px"><input type="checkbox" class="prin" value="'+k+'"> <b>'+k+'</b></label><input type="text" class="prinC" data-p="'+k+'" placeholder="조건 — '+PRINS[k]+'" style="flex:1;min-width:220px"></div>'; }).join('');
+function renderEv(){
+  var m=getEv(), ks=Object.keys(m);
+  $('evList').innerHTML = ks.length ? ks.map(function(k){ var e=m[k];
+    return '<label class="card" style="display:block;margin:6px 0"><input type="checkbox" class="evc" value="'+k+'"> <b>'+esc(e.label)+'</b> <span class="tag">'+esc(e.at)+'</span><br><span style="font-size:14.5px">'+esc(e.text)+'</span></label>'; }).join('')
+    : '<p class="note">아직 이 기기에 모인 근거가 없습니다. 2·3차시 화면에서 검증·학습·채점을 하면 자동으로 모입니다. 아래에 직접 써도 됩니다.</p>';
+}
+function policy(){
+  var st=document.querySelector('input[name=stance]:checked'), m=getEv();
+  var ev=[].map.call(document.querySelectorAll('.evc:checked'),function(c){ return m[c.value].label+': '+m[c.value].text; });
+  if($('evExtra').value.trim()) ev.push($('evExtra').value.trim());
+  var pr=[].map.call(document.querySelectorAll('.prin:checked'),function(c){ return c.value; });
+  var cond=pr.map(function(k){ var v=document.querySelector('.prinC[data-p="'+k+'"]').value.trim(); return k+': '+(v||'(조건 미작성)'); });
+  return { kind:'policy', cls:$('cls').value, group:$('grp').value, role:ROLE, stance:st?st.value:'', claim:$('claim').value.trim(),
+    evidence:ev.join(' / '), principles:pr.join(','), conditions:cond.join(' / '), rebuttal:$('rebut').value.trim(), _ev:ev, _cond:cond };
+}
+function polCheck(p){
+  var miss=[]; if(!p.role) miss.push('역할'); if(!p.stance) miss.push('입장'); if(!p.claim) miss.push('핵심 주장');
+  if(!p._ev.length) miss.push('근거 1개 이상'); if(!p.principles) miss.push('윤리 원칙 1개 이상'); if(!p.rebuttal) miss.push('반론·재반박');
+  return miss;
+}
+$('polPrev').onclick=function(){
+  var p=policy(), miss=polCheck(p);
+  $('polOut').innerHTML='<div class="fc"><h3>'+esc(p.cls)+'반 '+esc(p.group)+'모둠 정책 제안서</h3><p class="tag">역할: '+esc(p.role||'—')+' · 입장: '+esc(p.stance||'—')+'</p>'+
+    '<p><b>주장</b> '+esc(p.claim||'—')+'</p><p><b>근거</b></p><ul>'+(p._ev.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')||'<li>—</li>')+'</ul>'+
+    '<p><b>과학 윤리 조건</b></p><ul>'+(p._cond.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')||'<li>—</li>')+'</ul><p><b>반론과 재반박</b> '+esc(p.rebuttal||'—')+'</p></div>'+
+    (miss.length?'<p class="note model">아직 비어 있는 칸: '+miss.join(', ')+'</p>':'<p class="note">빠진 칸이 없습니다. 근거가 주장을 정말 뒷받침하는지 한 번 더 읽어 보세요.</p>');
+};
+$('polSend').onclick=function(){
+  var p=policy(), miss=polCheck(p);
+  if(miss.length){ alert('채워 주세요: '+miss.join(', ')); return; }
+  var b={}; Object.keys(p).forEach(function(k){ if(k[0]!=='_') b[k]=p[k]; });
+  post(b).then(function(){ $('polMsg').textContent='전송 요청함 — 05에서 우리 모둠이 보이면 저장된 것'; }).catch(function(e){ $('polMsg').textContent='보내지 못함: '+e.message; });
+};
+$('polLoad').onclick=function(){
+  jsonp({action:'policies'}, function(d){
+    if(!d.ok){ $('dash').innerHTML='<p class="note">'+esc(d.error)+'</p>'; return; }
+    var cls=$('cls').value, last={};
+    d.rows.filter(function(r){ return String(r.cls)===cls; }).forEach(function(r){ last[r.group]=r; }); // 모둠별 마지막 제출
+    var list=Object.keys(last).sort().map(function(k){ return last[k]; });
+    $('polCount').textContent=cls+'반 '+list.length+'모둠 제출';
+    if(!list.length){ $('dash').innerHTML='<p class="note">우리 반 제안이 아직 없습니다.</p>'; return; }
+    var count=function(keyFn, keys){ var c={}; keys.forEach(function(k){ c[k]=0; }); list.forEach(function(r){ keyFn(r).forEach(function(k){ if(k in c) c[k]++; }); }); return keys.map(function(k){ return {label:esc(k), v:c[k], text:c[k]+'모둠'}; }); };
+    var n=list.length;
+    $('dash').innerHTML='<div class="grid2"><div><h3>입장</h3>'+bars(count(function(r){return [r.stance];},['찬성','조건부 찬성','반대']),n)+'</div>'+
+      '<div><h3>고른 과학 윤리 원칙</h3>'+bars(count(function(r){return String(r.principles).split(',');},Object.keys(PRINS)).map(function(x){x.color='var(--s2)';return x;}),n)+'</div></div>'+
+      '<h3>역할</h3>'+bars(count(function(r){return [r.role];},Object.keys(ROLES)).map(function(x){x.color='var(--s3)';return x;}),n)+
+      '<p class="note">막대 길이 = 모둠 수 ÷ 제출한 모둠 수('+n+'). 한 모둠이 원칙을 여러 개 고를 수 있어 원칙 막대의 합은 '+n+'을 넘을 수 있습니다.</p>'+
+      '<div class="grid2">'+list.map(function(r){ return '<div class="card"><h3>'+esc(r.group)+'모둠 · '+esc(r.role)+' · '+esc(r.stance)+'</h3><p><b>주장</b> '+esc(r.claim)+'</p><p><b>조건</b> '+esc(r.conditions)+'</p><p><b>근거</b> '+esc(r.evidence)+'</p><p><b>반론·재반박</b> '+esc(r.rebuttal)+'</p></div>'; }).join('')+'</div>';
   });
 };
 })();

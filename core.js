@@ -81,6 +81,8 @@
     var rows = parseCSV(text);
     if (!rows.length) throw new Error('빈 파일입니다');
     var head = rows[0].map(function (h) { return String(h).trim(); });
+    if (head.some(function (h) { return /^평균기온|^일강수량|^평균 상대습도|^월평균|^월합강수량/.test(h); }))
+      throw new Error('일·월 자료(DAY·MON)입니다. 이 웹앱에는 시간자료(HR)가 필요합니다 — 포털에서 자료형태를 ‘시간’으로 골라 다시 받아 주세요');
     var idx = {};
     Object.keys(ASOS_COLS).forEach(function (k) {
       idx[k] = head.findIndex(function (h) { return !/QC/i.test(h) && ASOS_COLS[k](h); });
@@ -89,6 +91,8 @@
       if (idx[k] < 0) throw new Error('필수 열을 찾지 못했습니다: ' + k + ' · 머리글: ' + head.join(' | '));
     });
     var out = [];
+    if (rows.length > 1 && /^\d{4}-\d{2}-\d{2}$/.test(String(rows[1][idx.t]).trim()))
+      throw new Error('시각이 없는 날짜 단위 자료입니다. 시간자료(HR)가 필요합니다');
     for (var i = 1; i < rows.length; i++) {
       var r = rows[i];
       var ms = parseKST(r[idx.t]);
@@ -526,7 +530,7 @@
   }
 
   return {
-    VERSION: '0.2.0', HOUR: HOUR, MMHG_TO_HPA: MMHG_TO_HPA,
+    VERSION: '0.3.0', HOUR: HOUR, MMHG_TO_HPA: MMHG_TO_HPA,
     parseCSV: parseCSV, parseKST: parseKST, fmtHour: fmtHour, fmtTime: fmtTime, num: num,
     parseAsosPortal: parseAsosPortal, toSlimCSV: toSlimCSV, parseSlim: parseSlim,
     decodeKorean: decodeKorean, parseAnyWeather: parseAnyWeather, mergeRows: mergeRows, yearCoverage: yearCoverage, readZip: readZip, idbPut: idbPut, idbGet: idbGet,

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AI 예보관 · 교사용</title>
+<title>교사용 · 통합과학2 AI 융합수업</title>
 <meta name="robots" content="noindex">
 <style>
 :root{--ground:#F7F5F1;--surface:#fff;--surface-2:#F1EEE8;--ink:#191E22;--ink-soft:#525A62;--rule:#DFD9CF;--accent:#1D5E6B;--on-accent:#fff;--good:#1F6B3A;--danger:#9B3626;--ochre:#8A5A22}
@@ -27,12 +27,73 @@ code{background:var(--surface-2);padding:1px 5px;border-radius:5px}
 .drop.over{background:var(--surface-2)}
 small{color:var(--ink-soft)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+/* ── 입장 문(tonggwa2 와 같은 방식) ── */
+#door{position:fixed;inset:0;z-index:200;background:var(--ground);display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
+#door[hidden]{display:none}
+.door{width:100%;max-width:460px;background:var(--surface);border:1px solid var(--rule);border-radius:18px;padding:36px 34px 30px;box-shadow:0 1px 2px rgba(25,30,34,.05),0 8px 24px -12px rgba(25,30,34,.18)}
+.door .ic{font-size:34px;line-height:1;margin:0 0 16px;opacity:.55}
+.door h1{font-size:24px;margin:0 0 8px}
+.door .lead{margin:0 0 26px;font-size:14.5px;color:var(--ink-soft);line-height:1.75}
+.step{border-top:1px solid var(--rule);padding-top:20px;margin-top:20px}
+.step:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.step .k{margin:0 0 10px;font-size:11px;letter-spacing:.14em;color:var(--ink-soft);display:flex;align-items:center;gap:8px}
+.step .k b{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:var(--rule);color:var(--ink-soft);font-size:11px}
+.step.done .k b{background:var(--good);color:#fff} .step.done .k{color:var(--good)}
+.step:disabled{opacity:.4}
+fieldset.step{border:0;border-top:1px solid var(--rule);margin-inline:0;padding-inline:0;min-inline-size:0}
+.door input{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--rule);border-radius:11px;background:var(--surface);color:var(--ink);min-width:0}
+.door .row{display:flex;gap:9px;margin-top:10px;flex-wrap:nowrap}
+.door .who{margin-top:9px;font-size:13.5px;color:var(--good);word-break:break-all}
+.door .st{margin-top:10px;font-size:13.5px;line-height:1.7;min-height:1.2em}
+.door .st.no{color:var(--danger)} .door .st.mute{color:var(--ink-soft)} .door .st.ok{color:var(--good)}
+.door .keep{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13.5px;color:var(--ink-soft)}
+.door .keep input{width:auto}
+.door .foot{margin-top:24px;padding-top:16px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-soft);line-height:1.75}
+.topline{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--ink-soft)}
+.topline .sp{flex:1}
+.tbtn{font:inherit;font-size:13px;border:1px solid var(--rule);background:var(--surface);color:var(--ink-soft);border-radius:8px;padding:4px 10px;cursor:pointer}
 </style>
 </head>
-<body><div class="wrap">
-<p><a href="./">← 학생 화면</a></p>
-<h1>AI 예보관 · 교사용</h1>
-<p>기상 빅데이터 준비 · 실시간 연결 설정 · 실제 날씨 입력(채점용). 이 페이지 주소는 학생에게 공유하지 마세요.</p>
+<body>
+
+<!-- ══════════ 입장 문 — 계정 확인 → 비밀번호 ══════════ -->
+<div id="door" role="dialog" aria-modal="true" aria-labelledby="doorH" hidden>
+  <div class="door">
+    <p class="ic">🔑</p>
+    <h1 id="doorH" tabindex="-1">교사 화면</h1>
+    <p class="lead">허용된 구글 계정으로 확인한 뒤 비밀번호를 넣어야 화면이 열립니다. 실제 날씨 저장·브리지 토큰 보기처럼 서버에 닿는 동작은 비밀번호로 한 번 더 확인합니다.</p>
+    <div class="step" id="s0" hidden>
+      <p class="k"><b>0</b> Apps Script 주소</p>
+      <input type="url" id="gasIn" placeholder="https://script.google.com/macros/s/…/exec" spellcheck="false">
+      <div class="row"><button class="btn" id="gasBtn" type="button">저장</button></div>
+      <p class="st mute">config.js 의 GAS 칸이 비어 있어 이 브라우저에 한 번 저장합니다.</p>
+    </div>
+    <div class="step" id="s1">
+      <p class="k"><b>1</b> 계정 확인</p>
+      <div id="gbtn"></div>
+      <div id="manual" hidden>
+        <input type="email" id="mail" placeholder="선생님 계정 주소" autocomplete="username" spellcheck="false">
+        <div class="row"><button class="btn" id="mailBtn" type="button">확인</button></div>
+      </div>
+      <p class="who" id="who1" hidden></p>
+      <p class="st mute" id="st1" role="status" aria-live="polite">계정을 확인하는 중…</p>
+    </div>
+    <fieldset class="step" id="s2" disabled>
+      <p class="k"><b>2</b> 비밀번호</p>
+      <input type="password" id="pw" placeholder="비밀번호" autocomplete="current-password">
+      <div class="row"><button class="btn" id="pwBtn" type="button">들어가기</button></div>
+      <label class="keep"><input type="checkbox" id="keep"> 이 브라우저에서 12시간 동안 기억(교사 전용 기기에서만)</label>
+      <p class="st mute" id="st2" role="status" aria-live="polite"></p>
+    </fieldset>
+    <p class="foot">이것은 <b>허들</b>입니다. 정적 웹사이트에는 서버가 없어 완전한 접근 통제를 걸 수 없습니다. 그래서 학생 개인정보·평가 정답은 이 저장소에 두지 않습니다. <a href="./">← 학생 화면으로</a></p>
+  </div>
+</div>
+
+<div class="wrap" id="app">
+<div class="topline"><a href="./">← 학생 화면</a><span class="sp"></span><span id="whoami"></span><button class="tbtn" id="lockBtn" type="button">잠그기</button></div>
+<h1>교사용 · 통합과학2 Ⅲ. 과학과 미래 사회 AI 융합수업</h1>
+<p>기상 빅데이터 준비 · 실시간 연결 · 실제 날씨 입력(채점용) · 브리지 상태</p>
 
 <section>
   <h2>① 기상청 ASOS 시간자료 → 웹앱 자료 파일 만들기</h2>
@@ -40,63 +101,143 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <ol>
     <li><a href="https://data.kma.go.kr" target="_blank" rel="noopener">data.kma.go.kr</a> 로그인(무료 회원가입)</li>
     <li>데이터 › 기상관측 › 지상 › <b>종관기상관측(ASOS)</b> › <b>자료</b> 탭</li>
-    <li>자료형태 <b>시간 자료</b> · 지점 <b>서울(108)</b> · 요소 <b>기온, 강수, 바람, 기압, 습도</b>(넉넉히 골라도 됨)</li>
+    <li>자료형태 <b>시간 자료</b>(⚠ ‘일 자료’가 아님 — 파일 이름에 <code>_HR_</code>가 들어가야 함, <code>_DAY_</code>는 쓸 수 없음) · 지점 <b>서울(108)</b> · 요소 <b>기온, 강수, 바람, 기압, 습도</b>(넉넉히 골라도 됨)</li>
     <li>기간: 시간 자료는 <b>1회 최대 1년</b> → 2016-01-01 00시 ~ 2016-12-31 23시처럼 <b>한 해씩</b> 조회 → <b>CSV</b> 내려받기, 2025년까지 10번 반복<br>
-        <small>(긴 기간을 한 번에 받으려면 ‘파일셋’ 탭의 ZIP을 받아도 됩니다. ZIP도 그대로 넣으면 됩니다)</small></li>
+        <small>(‘파일셋’ 탭에서 받을 때도 자료형태를 <b>시간</b>으로 골라 <code>SURFACE_ASOS_108_HR_…zip</code>을 받으세요. ZIP도 그대로 넣으면 됩니다)</small></li>
     <li>받은 파일 <b>10개를 아래 상자에 한꺼번에 끌어다 놓기</b>(순서·파일 이름·중복 상관없음, CSV·ZIP 모두 가능)</li>
-    <li>연도별 표에서 빠진 해가 없는지 확인 → <b>asos_108_hourly.csv 내려받기</b> → 저장소 <code>data/</code> 폴더에 넣고 커밋</li>
+    <li>연도별 표에서 빠진 해가 없는지 확인 → <b>asos_108_hourly.csv 내려받기</b> → 저장소 <code>data/</code> 폴더에 넣고 <b>커밋·푸시</b><br><small>학생 화면은 저장소의 <code>data/asos_108_hourly.csv</code>를 읽습니다. 교사 페이지에 넣기만 해서는 다른 기기에 보이지 않습니다(“이 브라우저에서 바로 써 보기”는 이 브라우저에서만).</small></li>
   </ol></details>
   <label id="drop" class="drop" for="asosFiles">여기에 CSV·ZIP 파일을 끌어다 놓거나 눌러서 고르세요<input type="file" id="asosFiles" accept=".csv,.zip" multiple hidden></label>
   <div id="asosOut"></div>
 </section>
 
 <section>
-  <h2>② 실시간 연결(Apps Script) 설정</h2>
-  <div class="row"><label>웹앱 주소(/exec) <input type="text" id="gas" placeholder="https://script.google.com/macros/s/…/exec"></label></div>
-  <div class="row"><label>WRITE_TOKEN <input type="text" id="tok" style="min-width:140px;flex:0"></label>
-    <label>출구 카드 구글 설문 주소(선택) <input type="text" id="form"></label></div>
-  <div class="row"><button class="btn" id="save">저장·연결 시험</button><span id="ping"></span></div>
-  <div class="row"><label>학생용 링크 <input type="text" id="stuLink" readonly></label><button class="btn ghost" id="copy">복사</button></div>
-  <p class="note">학생 링크에는 Apps Script 주소만 들어갑니다(토큰은 들어가지 않음). 학생 기기에 한 번 열면 그 기기에 저장됩니다.</p>
+  <h2>② 연결 정보</h2>
+  <div class="row"><label>Apps Script 주소 <input type="text" id="gas" readonly></label><button class="btn ghost" id="ping" type="button">연결 시험</button><span id="pingTxt"></span></div>
+  <div class="row"><label>출구 카드 구글 설문 주소(선택) <input type="text" id="form" placeholder="https://forms.gle/…"></label><button class="btn ghost" id="formSave" type="button">저장</button></div>
+  <div class="row"><label>학생용 링크 <input type="text" id="stuLink" readonly></label><button class="btn ghost" id="copy" type="button">복사</button></div>
+  <div class="row"><button class="btn ghost" id="tokBtn" type="button">브리지용 WRITE_TOKEN 보기</button><code id="tokTxt"></code></div>
+  <p class="note">Apps Script 주소는 <code>config.js</code>의 <code>GAS</code>에 넣어 커밋해 두면 학생 링크에 주소를 붙이지 않아도 됩니다. 토큰은 학생 링크에 들어가지 않습니다(브리지 <code>config.bat</code>에만 넣음).</p>
 </section>
 
 <section>
   <h2>③ 실제 날씨 입력(3차시 채점용)</h2>
-  <p class="note">2차시 예보 카드의 기준은 “예보한 때부터 앞으로 6시간 안에 서울(ASOS) 강수량 0.1 mm 이상 = 비, 아니면 비 안 옴”입니다. 반마다 예보한 교시가 다르므로 <b>반별로</b> 그 반의 예보 시각부터 6시간 동안의 서울 시간별 강수(기상자료개방포털·날씨누리)를 확인해 입력합니다.</p>
+  <p class="note">예보 카드의 기준은 “예보한 때부터 앞으로 6시간(오늘 저녁까지) 서울(ASOS) 강수량 0.1 mm 이상 = 비, 아니면 비 안 옴”입니다. 반마다 예보한 교시가 다르므로 <b>반별로</b> 그 반의 예보 시각부터 6시간 동안의 서울 시간별 강수(기상자료개방포털·날씨누리)를 확인해 입력합니다.</p>
   <div class="row"><label>예보한 날짜 <input type="date" id="tDate"></label>
     <label>반 <select id="tCls"></select></label>
     <label>실제 <select id="tRain"><option>비</option><option>비 안 옴</option></select></label>
     <label>강수량(mm) <input type="number" step="0.1" id="tMm" style="width:90px"></label>
-    <button class="btn" id="tSend">저장</button><span id="tMsg"></span></div>
+    <button class="btn" id="tSend" type="button">저장</button><span id="tMsg"></span></div>
 </section>
 
 <section>
   <h2>④ 센서 브리지 상태</h2>
-  <div class="row"><button class="btn ghost" id="liveChk">최신 기록 확인</button><span id="liveTxt"></span></div>
-  <p class="note">브리지 실행: <code>python bridge/pasco_bridge.py --weather 센서ID --gas 웹앱주소 --token 토큰</code> · 자세한 순서는 저장소 <code>bridge/README.md</code></p>
+  <div class="row"><button class="btn ghost" id="liveChk" type="button">최신 기록 확인</button><span id="liveTxt"></span></div>
+  <p class="note">브리지는 저장소 <code>bridge/run_bridge.bat</code> 메뉴로 실행합니다(순서는 <code>bridge/README.md</code>).</p>
+</section>
+
+<section>
+  <h2>⑤ 4차시 정책 제안 대시보드</h2>
+  <p>학생 화면 <a href="./?tab=l4">4차시 탭</a>의 “우리 반 대시보드”를 수업 화면에 띄웁니다.</p>
 </section>
 </div>
 
+<script src="config.js"></script>
 <script src="core.js"></script>
 <script>
 (function(){
-var C=window.Core, $=function(i){return document.getElementById(i);};
-var LS={get:function(k,d){try{var v=localStorage.getItem('aif_'+k);return v===null?d:v;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem('aif_'+k,v);}catch(e){}}};
-$('gas').value=LS.get('gas',''); $('tok').value=LS.get('tok',''); $('form').value=LS.get('form','');
-function link(){ var u=new URL('./', location.href); if($('gas').value) u.searchParams.set('gas',$('gas').value.trim()); if($('form').value) u.searchParams.set('form',$('form').value.trim()); $('stuLink').value=u.toString(); }
-link();
-function jsonp(p,cb){ var g=$('gas').value.trim(); if(!g){cb({ok:false,error:'주소 없음'});return;}
-  var n='cb'+Date.now(), s=document.createElement('script'); window[n]=function(d){cb(d);delete window[n];s.remove();};
-  s.src=g+'?'+new URLSearchParams(p)+'&callback='+n; s.onerror=function(){cb({ok:false,error:'연결 실패'});}; document.body.appendChild(s); }
-$('save').onclick=function(){ LS.set('gas',$('gas').value.trim()); LS.set('tok',$('tok').value.trim()); LS.set('form',$('form').value.trim()); link();
-  jsonp({action:'ping'},function(d){ $('ping').innerHTML=d.ok?'<span class="ok">연결됨 v'+d.ver+'</span>':'<span class="bad">'+d.error+'</span>'; }); };
+var C=window.Core, CFG=window.AIF_CONFIG||{}, $=function(i){return document.getElementById(i);};
+var LS={get:function(k,d){try{var v=localStorage.getItem('aif_'+k);return v===null?d:v;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem('aif_'+k,v);}catch(e){}},del:function(k){try{localStorage.removeItem('aif_'+k);}catch(e){}}};
+var GAS=(CFG.GAS||LS.get('gas','')).trim(), ME='', PIN='', OFFLINE=false, KEY='teacher.pass';
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+function jsonp(p,cb,timeout){ if(!GAS){cb({ok:false,error:'Apps Script 주소 없음'});return;}
+  var n='cb'+Date.now()+Math.floor(Math.random()*1e4), s=document.createElement('script'), done=false;
+  var fin=function(d){ if(done) return; done=true; s.remove(); cb(d); };
+  window[n]=function(d){ fin(d); window[n]=function(){}; };  // 시간 초과 뒤 늦게 온 응답도 오류 없이 버림
+  s.src=GAS+(GAS.indexOf('?')<0?'?':'&')+new URLSearchParams(p)+'&callback='+n;
+  s.onerror=function(){ fin({ok:false,error:'연결 실패',offline:true}); }; setTimeout(function(){ fin({ok:false,error:'시간 초과',offline:true}); }, timeout||9000);
+  document.body.appendChild(s); }
+function sha256(v){ return crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v))).then(function(h){ return [].map.call(new Uint8Array(h),function(x){return ('0'+x.toString(16)).slice(-2);}).join(''); }); }
+
+/* ══════════ 입장 문 ══════════ */
+var say=function(id,c,t){ $(id).className='st '+c; $(id).textContent=t; };
+(function resume(){
+  var v=null; try{ v=JSON.parse(LS.get(KEY,'null')); }catch(e){}
+  if(!(v&&v.until>Date.now()&&v.pin&&v.me)){ openDoor(); return; }
+  jsonp({action:'checkpin',pin:v.pin},function(d){
+    if(d.ok===false&&!d.offline){ LS.del(KEY); openDoor(); return; }
+    if(d.offline) OFFLINE=true;
+    ME=v.me; PIN=v.pin; enter();
+  });
+})();
+function openDoor(){
+  $('door').hidden=false; document.body.style.overflow='hidden'; $('app').setAttribute('inert','');
+  if(!GAS){ $('s0').hidden=false; say('st1','mute','먼저 Apps Script 주소를 저장해 주세요.'); return; }
+  if(CFG.CLIENT_ID) startGoogle(); else manualMode('구글 로그인이 아직 연결되지 않았습니다.');
+}
+$('gasBtn').onclick=function(){ var v=$('gasIn').value.trim(); if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(v)){ alert('…/exec 로 끝나는 웹 앱 주소를 넣어 주세요'); return; } LS.set('gas',v); GAS=v; $('s0').hidden=true; openDoor(); };
+function enter(){ $('door').hidden=true; document.body.style.overflow=''; $('app').removeAttribute('inert'); $('whoami').textContent=ME+(OFFLINE?' · 오프라인':''); boot(); }
+function startGoogle(){
+  say('st1','mute','구글 로그인 창을 준비하는 중…');
+  var s=document.createElement('script'); s.src='https://accounts.google.com/gsi/client'; s.async=true;
+  s.onerror=function(){ manualMode('구글 로그인을 불러오지 못했습니다.'); };
+  s.onload=function(){ try{ google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onCred,auto_select:false});
+      google.accounts.id.renderButton($('gbtn'),{theme:'outline',size:'large',width:340,text:'signin_with',locale:'ko'});
+      say('st1','mute','위 단추를 눌러 선생님 계정으로 로그인해 주세요.'); }catch(e){ manualMode('구글 로그인을 시작하지 못했습니다.'); } };
+  document.head.appendChild(s);
+}
+function manualMode(why){ $('gbtn').hidden=true; $('manual').hidden=false; say('st1','mute',why+' 계정 주소를 직접 넣어 확인합니다.'); }
+function passed1(email,msg){ ME=email; say('st1','ok',msg); $('s1').classList.add('done'); $('who1').hidden=false; $('who1').textContent='✓ '+email; $('gbtn').hidden=true; $('manual').hidden=true; $('s2').disabled=false; $('pw').focus(); }
+function onCred(res){
+  say('st1','mute','구글에 확인하는 중…');
+  jsonp({action:'gtoken',idtoken:res.credential},function(d){
+    if(!d.ok){ say('st1','no',d.error||'로그인 정보를 확인하지 못했습니다.'); return; }
+    if(!d.allowed){ say('st1','no',d.email+' 은 허용된 계정이 아닙니다.'); return; }
+    passed1(d.email,'허용된 계정입니다 — '+d.email);
+  },12000);
+}
+$('mailBtn').onclick=function(){
+  var t=$('mail').value.trim().toLowerCase(); if(t.indexOf('@')<1){ say('st1','no','계정 주소를 정확히 넣어 주세요.'); return; }
+  jsonp({action:'chkwho',email:t},function(d){
+    if(d.offline){ OFFLINE=true; if((CFG.FALLBACK_WHO||[]).map(function(x){return x.toLowerCase();}).indexOf(t)<0){ say('st1','no','구글에 닿지 못했고 예비 목록에도 없는 계정입니다.'); return; } passed1(t,'구글에 닿지 못해 예비 목록으로 확인했습니다.'); return; }
+    if(!d.ok){ say('st1','no','허용된 계정이 아닙니다.'); return; }
+    passed1(t,'허용된 계정입니다.');
+  });
+};
+$('mail').addEventListener('keydown',function(e){ if(e.key==='Enter') $('mailBtn').click(); });
+$('pwBtn').onclick=tryPw; $('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') tryPw(); });
+function tryPw(){
+  var v=$('pw').value.trim(); if(!ME){ say('st2','no','먼저 계정을 확인해 주세요.'); return; } if(!v){ say('st2','no','비밀번호를 넣어 주세요.'); return; }
+  say('st2','mute','확인하는 중…');
+  var done=function(off){ PIN=v; $('s2').classList.add('done'); say('st2','ok',off?'구글에 닿지 못해 예비 비밀번호로 들어갑니다.':'들어갑니다.');
+    if($('keep').checked&&!off) LS.set(KEY,JSON.stringify({me:ME,pin:PIN,until:Date.now()+12*3600*1000}));
+    setTimeout(enter,off?900:220); };
+  var offline=function(){ if(!CFG.FALLBACK_PIN_HASH){ say('st2','no','구글(Apps Script)에 닿지 못해 비밀번호를 확인할 수 없습니다. 인터넷 연결을 확인해 주세요.'); return; }
+    sha256(v).then(function(h){ if(h===CFG.FALLBACK_PIN_HASH) done(true); else say('st2','no','구글에 닿지 못했고 예비 비밀번호도 아닙니다.'); }); };
+  if(OFFLINE){ offline(); return; }
+  jsonp({action:'checkpin',pin:v},function(d){
+    if(d.offline){ OFFLINE=true; offline(); return; }
+    if(d.ok) done(false); else say('st2','no','비밀번호가 맞지 않습니다. (여러 번 틀리면 1분 동안 막힙니다. 계속 막히면 Apps Script 편집기에서 설정초기화 실행)');
+  });
+}
+$('lockBtn').onclick=function(){ LS.del(KEY); location.reload(); };
+
+/* ══════════ 본문 ══════════ */
+function boot(){
+  $('gas').value=GAS; $('form').value=LS.get('form','');
+  link();
+  $('tDate').value=C.fmtTime(Date.now()).slice(0,10);
+  (CFG.CLASSES||[1,2,3,4,5,6,7]).forEach(function(i){ $('tCls').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'반</option>'); });
+}
+function link(){ var u=new URL('./',location.href); if(GAS&&!CFG.GAS) u.searchParams.set('gas',GAS); if($('form').value) u.searchParams.set('form',$('form').value.trim()); $('stuLink').value=u.toString(); }
+$('formSave').onclick=function(){ LS.set('form',$('form').value.trim()); link(); };
+$('ping').onclick=function(){ jsonp({action:'ping'},function(d){ $('pingTxt').innerHTML=d.ok?'<span class="ok">연결됨 v'+esc(d.ver)+'</span>':'<span class="bad">'+esc(d.error)+'</span>'; }); };
 $('copy').onclick=function(){ $('stuLink').select(); try{ navigator.clipboard.writeText($('stuLink').value); }catch(e){ document.execCommand('copy'); } };
-$('tDate').value=C.fmtTime(Date.now()).slice(0,10);
-for(var i=1;i<=12;i++) $('tCls').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'반</option>'); $('tCls').value='2';
+$('tokBtn').onclick=function(){ jsonp({action:'token',pin:PIN},function(d){ $('tokTxt').textContent=d.ok?d.token:(d.error||'불러오지 못함'); }); };
 $('tSend').onclick=function(){
-  fetch($('gas').value.trim(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify({kind:'truth',token:$('tok').value.trim(),date:$('tDate').value,cls:$('tCls').value,rain:$('tRain').value,mm:$('tMm').value})})
-  .then(function(){ $('tMsg').textContent='보냄 — 학생 화면 3차시에서 확인(토큰이 틀리면 저장되지 않음)'; });
+  $('tMsg').textContent='저장 중…';
+  jsonp({action:'settruth',pin:PIN,date:$('tDate').value,cls:$('tCls').value,rain:$('tRain').value,mm:$('tMm').value},function(d){
+    $('tMsg').innerHTML=d.ok?'<span class="ok">저장됨 — 학생 화면 3차시에서 확인</span>':'<span class="bad">'+esc(d.error)+'</span>'; });
 };
 $('liveChk').onclick=function(){ jsonp({action:'latest'},function(d){ $('liveTxt').textContent=d.ok&&d.latest?('마지막 '+d.latest.ts+' · '+d.latest.p+' hPa · 계열 '+d.series.length+'점'):(d.error||'기록 없음'); }); };
 
